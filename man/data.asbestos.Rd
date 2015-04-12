@@ -27,12 +27,11 @@ The primary data set includes ages 25-89, which is obtained when using the funct
 	\item{time.adjust}{0.  Thus age=89 in period=1967 corresponds to cohort=1967-89+0=1878.}
 }
 \source{Data were prepared for the Asbestos Working Party by the UK Health and Safety Executive.
-An APC analysis of these data can be found in Martinez Miranda, Nielsen and Nielsen (2014)}
-\references{Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2014)
-Inference and forecasting in the age-period-cohort model with unknown
-exposure with an application to mesothelioma mortality.
-To appear in \emph{Journal of the Royal Statistical Society series} A.}
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 29 August 2014}
+An APC analysis of these data can be found in Martinez Miranda, Nielsen and Nielsen (2015)}
+\references{
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
+}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 29 January 2015}
 \seealso{General description of \code{\link{apc.data.list}} format.
 }
 \examples{
@@ -44,14 +43,14 @@ objects(data.list)
 
 #####################
 #	Figure 1,a-c from
-#	Miranda Martinex, Nielsen and Nielsen (2013).
+#	Miranda Martinex, Nielsen and Nielsen (2015).
 
 data.list	<- data.asbestos()	
 apc.plot.data.sums(data.list,type="l")
 
 #####################
 #	Figure 1,d from
-#	Miranda Martinex, Nielsen and Nielsen (2013).
+#	Miranda Martinex, Nielsen and Nielsen (2015).
 data.list	<- data.asbestos()	
 apc.plot.data.within(data.list,type="l",lty=1)
 

@@ -59,7 +59,8 @@ Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 27 Aug 2014}
+\seealso{The \href{../doc/index.html}{vignette} \href{../doc/NewDesign.pdf}{NewDesign.pdf}.}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 1 Mar 2015}
 \examples{
 #####################
 #	EXAMPLE 1 with Belgian lung cancer data
@@ -87,6 +88,7 @@ apc.fit.model(data.list,"poisson.dose.response","APC")$deviance
 #	The age-drift model gives a good fit.
 #	This fit can be refined to a cubic or quadratic age effect.
 #	The latter is not precoded so one will have to work directly with the design matrix.
+#	SEE ALSO VIGNETTE
 
 data.list	<- data.Belgian.lung.cancer()
 

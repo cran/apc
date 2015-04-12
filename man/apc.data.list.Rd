@@ -27,7 +27,6 @@ Some times it may be convenient to add further arguments to the \code{apc.data.l
 			\item{"AP"}{has    age/period as increasing row/column index.}
 			\item{"CA"}{has cohort/age    as increasing row/column index.}
 			\item{"CL"}{has cohort/age 	  as increasing row/column index, triangular.}
-			\item{"CL.vector.by.row"}{row-wise vector version of "CL".}
 			\item{"CP"}{has cohort/period as increasing row/column index.}
 			\item{"PA"}{has period/age    as increasing row/column index.}
 			\item{"PC"}{has period/cohort as increasing row/column index.}
@@ -54,7 +53,7 @@ Some times it may be convenient to add further arguments to the \code{apc.data.l
 		\item{per.max}{Numeric.  If data.format is not "trapezoid" the value is NULL. If data.format is "trapezoid" the default is \code{per.max=nrow(response)+ncol(response)-1-per.zero}.}
 		\item{time.adjust}{Numeric.  Default of 0.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 5 Dec 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 Mar 2015}
 \seealso{The below example shows how the \code{\link{data.Japanese.breast.cancer}} data.list was generated.
 Other provided data sets include
 \code{\link{data.asbestos}}
@@ -66,13 +65,22 @@ A subset of the data can be selected using \code{\link{apc.data.list.subset}}.
 \examples{
 ###############
 #	Artificial data
-#	Generate a 5x7 matrix and make arbitrary decisions for rest
+#	(1) Generate a 5x7 matrix and make arbitrary decisions for rest
 
 response <- matrix(data=seq(1:35),nrow=5,ncol=7)
 data.list	<- list(response=response,dose=NULL,data.format="AP",
 					age1=25,per1=1955,coh1=NULL,unit=5,
 					per.zero=NULL,per.max=NULL)
 data.list
+
+#	(2) Chain Ladder data
+
+k			<- 5
+v.response 	<- seq(1:(k*(k+1)/2))
+data.list	<- apc.data.list(response=vector.2.triangle(v.response,k),
+							data.format="CL.vector.by.row",age1=2001)
+data.list
+
 
 ###############
 #	Japanese breast cancer

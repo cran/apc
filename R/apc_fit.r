@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielen, 27 Aug 2014, version 1
+#	Bent Nielen, 1 April 2015, version 1.0.3
 #	functions to fit model
 #######################################################
-#	Copyright 2014 Bent Nielsen
+#	Copyright 2014, 2015 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -25,7 +25,7 @@
 #	apc.get.design.collinear
 #########################################################
 apc.get.design.collinear	<- function(apc.index)
-#	BN 27 Nov 2013
+#	BN 1 April 2015
 #	Constructs a collinear design matrix for an apc model.
 #	It includes columns for intercept,
 #	for age/period/cohort slopes,  
@@ -44,15 +44,13 @@ apc.get.design.collinear	<- function(apc.index)
 	per.max		<- apc.index$per.max
 	coh.max		<- apc.index$coh.max
 	per.zero	<- apc.index$per.zero
+	per.odd		<- apc.index$per.odd
+	U			<- apc.index$U
 	n.data		<- apc.index$n.data
 	########################
 	#	declaring design matrix
 	p.design.collinear	<- age.max+per.max+coh.max-2
 	  design.collinear	<- matrix(data=0,nrow=n.data,ncol=p.design.collinear)
-	########################
-	#	get anchoring
-	if(per.zero %% 2==0)	{	U <- per.zero 	 %/% 2;	per.odd <- FALSE;	} 
-	else					{	U <- (per.zero+1)%/% 2;	per.odd <- TRUE; 	} 
 	########################
 	# 	construction of design matrix
 	for(row in 1:n.data)
@@ -61,21 +59,21 @@ apc.get.design.collinear	<- function(apc.index)
 		coh	<- index.trap[row,2]		#	cohort
 		per	<- age+coh-1
 		design.collinear[row,1]	<- 1
-		design.collinear[row,2]	<- age-1-U
-		design.collinear[row,4]	<- coh-1-U
+		design.collinear[row,2]	<- age-U
+		design.collinear[row,4]	<- coh-U
 		design.collinear[row,3]	<- design.collinear[row,2]+design.collinear[row,4]
-		if(age<U+1)
-			design.collinear[row,(4+age):(4+U)]												<- seq(1,U-age+1)
-		if(age>U+2)
-			design.collinear[row,(4+U+1):(4+U+age-U-2)]										<- seq(age-U-2,1)
-		if(per.odd && per==2*U)
-			design.collinear[row,(1+age.max+1+1)]											<- 1
-		if(per>2*U+2)
-			design.collinear[row,(1+age.max+1+per.odd+1)  :(1+age.max+1+per.odd+per-2*U-2)]	<- seq(per-2*U-2,1)
-		if(coh<U+1)
-			design.collinear[row,(1+age.max+per.max-1+coh):(1+age.max+per.max-1+U)]			<- seq(1,U-coh+1)
-		if(coh>U+2)
-			design.collinear[row,(1+age.max+per.max-1+U+1):(1+age.max+per.max-1+U+coh-U-2)]	<- seq(coh-U-2,1)
+		if(age<U)
+			design.collinear[row,(4+age):(4+U-1)]										<- seq(1,U-age)
+		if(age>U+1)
+			design.collinear[row,(4+U):(4+U+age-U-2)]									<- seq(age-U-1,1)
+		if(per.odd && per==2*(U-1))
+			design.collinear[row,(2+age.max+1)]											<- 1
+		if(per>2*U)
+			design.collinear[row,(2+age.max+per.odd+1):(2+age.max+per.odd+per-2*U)]		<- seq(per-2*U,1)
+		if(coh<U)
+			design.collinear[row,(age.max+per.max+coh):(age.max+per.max+U-1)]			<- seq(1,U-coh)
+		if(coh>U+1)
+			design.collinear[row,(age.max+per.max+U):(age.max+per.max+U+coh-U-2)]		<- seq(coh-U-1,1)
  	}
 	return(design.collinear)
 }	# 	apc.get.design.collinear
@@ -156,7 +154,7 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 #	apc.fit.model
 #########################################################
 apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL)
-#	BN 27 Aug 2014
+#	BN 17 mar 2015
 #	Function to estimate apc sub-model
 #	uses canonical parametrisation as in Nielsen (2013)
 #	In:		apc.data.list
@@ -164,12 +162,16 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 #			model.family				Character
 #										"poisson.response"
 #											uses responses only		
+#										"od.poisson.response"
+#											uses responses only, over-dispersed		
 #										"poisson.dose.response"
 #											uses doses and responses		
 #										"gaussian.response"
 #											uses responses only		
 #										"gaussian.rates"
 #											uses rates=responses/doses only
+#										"log.normal.response"
+#											takes log of response and fits gaussian model
 #			model.design				Character. Indicates which sub-model should be fitted.
 #										Possible choices:
 #										"APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1"			
@@ -205,20 +207,21 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	##############################
 	#	check input
 	model.design.list		<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
-	model.family.list		<- c("binomial.dose.response","poisson.response","poisson.dose.response","gaussian.rates","gaussian.response")
-	model.family.gaussian	<- c("gaussian.rates","gaussian.response")
+	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.response")
+	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.response")
+	model.family.mixed		<- c("poisson.response","od.poisson.response")
 	if(isTRUE(model.design %in% model.design.list)==FALSE)
-		return(cat("apc.error: model.design has wrong argument \n"))	
+		return(cat("apc.fit.model error: model.design has wrong argument \n"))	
 	if(isTRUE(model.family %in% model.family.list)==FALSE)
-		return(cat("apc.error: model.family has wrong argument \n"))
+		return(cat("apc.fit.model error: model.family has wrong argument \n"))
 	######################
 	#	get index
 	if(is.null(apc.index)==TRUE)
 		apc.index	<- apc.get.index(apc.data.list)
 	##############################
 	#	create indicator for mixed parametrisation
-	mixed.par	<- (1-isTRUE(model.design=="1"))*isTRUE(model.family %in% c("poisson.response"))
-	mixed.par.1	<-    isTRUE(model.design=="1") *isTRUE(model.family %in% c("poisson.response"))
+	mixed.par	<- (1-isTRUE(model.design=="1"))*isTRUE(model.family %in% model.family.mixed)
+	mixed.par.1	<-    isTRUE(model.design=="1") *isTRUE(model.family %in% model.family.mixed)
 	##############################
 	#	get values, that are used
 	age.max		<- apc.index$age.max				
@@ -231,8 +234,8 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	per.zero	<- apc.index$per.zero
 	index.trap	<- apc.index$index.trap
 	n.data		<- apc.index$n.data
-	v.response	<- apc.data.list$response[apc.index$index.data]
-	v.dose		<- apc.data.list$dose[    apc.index$index.data]
+	v.response	<- apc.index$response[apc.index$index.data]
+	v.dose		<- apc.index$dose[    apc.index$index.data]
 	##############################
 	#	get design
 	#		design matrix 
@@ -249,6 +252,8 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 		fit	<- glm.fit(design,cbind(v.response,v.dose-v.response),family=binomial(link="logit"))
 	if(model.family=="poisson.response")
 		fit	<- glm.fit(design,v.response,family=poisson(link="log"))	
+	if(model.family=="od.poisson.response")
+		fit	<- glm.fit(design,v.response,family=poisson(link="log"))	
 	#	Poisson regression for dose-response and with log link
 	if(model.family=="poisson.dose.response")
 		fit	<- glm.fit(design,v.response,family=poisson(link="log"),offset=log(v.dose))
@@ -258,6 +263,9 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	#	Gaussian regression for response only and with identity link (Least Squares)
 	if(model.family=="gaussian.rates")
 		fit	<- glm.fit(design,v.response/v.dose,family=gaussian(link="identity"))		
+	#	Gaussian regression for log(response) and with identity link (Least Squares)
+	if(model.family=="log.normal.response")
+		fit	<- glm.fit(design,log(v.response),family=gaussian(link="identity"))
 	##############################
 	#	construct for indices for double difference parameters  
 	index.age	<- NULL
@@ -353,17 +361,17 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 #	apc.fit.table
 #########################################################
 apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
-#	BN 13 Jan 2014
+#	BN 17 mar 2015
 {	#	apc.fit.table
 	######################
-	#	check input
-	model.family.list	<- c("binomial.dose.response","poisson.response","poisson.dose.response","gaussian.rates","gaussian.response")
-	if(isTRUE(model.family %in% model.family.list)==FALSE)
-		return(cat("apc.error: model.family has wrong argument \n"))
+	#	model families
+	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.response")
+	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.response")
+	model.family.od			<- c("od.poisson.response")
 	######################
-	#	check if model is Gaussian
-	model.family.gaussian	<- c("gaussian.rates","gaussian.response")
-	gaussian	<- isTRUE(model.family %in% model.family.gaussian)
+	#	check input
+	if(isTRUE(model.family %in% model.family.list)==FALSE)
+		return(cat("apc.fit.table error: model.family has wrong argument \n"))
 	######################
 	#	get index
 	if(is.null(apc.index)==TRUE)
@@ -380,35 +388,52 @@ apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
 		LR	<- dev.R-dev.U
 		df	<- df.R-df.U
 		aic	<- fit.R$aic
-		if(isTRUE(model.family %in% model.family.gaussian))		
+		if(gaussian)		
 			return(round(c(dev.R,df.R,LR,df,pchisq(LR,df,lower.tail=FALSE),aic),digits=3))
 		else	
 			return(round(c(dev.R,df.R,pchisq(dev.R,df.R,lower.tail=FALSE),LR,df,pchisq(LR,df,lower.tail=FALSE),aic),digits=3))
 	}
+	######################	
+	model.design.list	<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
+	######################	
+	#	number of columns
+															ncol <- 7
+		if(isTRUE(model.family %in% model.family.gaussian))	ncol <- 6
+		if(isTRUE(model.family %in% model.family.od))		ncol <- 9
 	######################
 	#	declare table
-	model.design.list	<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
-	fit.tab		<- matrix(nrow=length(model.design.list),ncol=(7-gaussian))
+	fit.tab		<- matrix(nrow=length(model.design.list),ncol=ncol,data=NA)
 	#	unrestricted apc model
-	fit.apc	<- apc.fit.model(apc.data.list,model.family,model.design="APC",apc.index)
-#	fit.tab[1,c(1,2,6)]	<- fit.tab.line.glm(fit.apc,fit.apc)[c(1,2,6)]
+	fit.apc	<- apc.fit.model(apc.data.list,model.family,model.design="APC",apc.index)	
 	#	model list
 	for(i in 1:length(model.design.list))
 	{
 		fit.sub			<- apc.fit.model(apc.data.list,model.family,model.design=model.design.list[i],apc.index)
-		fit.tab[i,]		<- fit.tab.line.glm(fit.apc, fit.sub,gaussian)
+		if(isTRUE(model.family %in% model.family.gaussian))
+			fit.tab[i,1:6]		<- fit.tab.line.glm(fit.apc, fit.sub,1)
+		else	
+			fit.tab[i,1:7]		<- fit.tab.line.glm(fit.apc, fit.sub,0)
 	}
-	if(gaussian)
-	{
-		colnames(fit.tab)	<- c("-2logL","df.residual","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
-		fit.tab[1,c(3,4,5)] <- NA
-	}	
-	else
-	{
-		colnames(fit.tab)	<- c("-2logL","df.residual","prob(>chi_sq)","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
-		fit.tab[1,c(4,5,6)] <- NA		
-	}	
+	#	OD F-test
+	if(isTRUE(model.family %in% model.family.od))
+	for(i in 2:length(model.design.list))
+	{	fit.tab[i,8]	= (fit.tab[i,4]/fit.tab[i,5])/(fit.tab[1,1]/fit.tab[1,2])
+		fit.tab[i,9]	= round(pf(fit.tab[i,8],fit.tab[i,5],fit.tab[1,2],lower.tail=FALSE),digits=3)
+	}
+	#	insert NAs
+		insert			<- c(4,5,6)
+	if(isTRUE(model.family %in% model.family.gaussian))
+		insert			<- c(3,4,5)
+	fit.tab[1,insert] <- NA
+	#	row names
 	rownames(fit.tab)	<- model.design.list
-	
+	#	column names
+		colnames		<- c("-2logL","df.residual","prob(>chi_sq)","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
+	if(isTRUE(model.family %in% model.family.gaussian))
+		colnames		<- c("-2logL","df.residual","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
+	if(isTRUE(model.family %in% model.family.od))
+		colnames		<- c("-2logL","df.residual","prob(>chi_sq)","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic","F","prob(>F)")	
+	colnames(fit.tab)	<- colnames		
+	######################
 	return(fit.tab)
 }	#	apc.fit.table

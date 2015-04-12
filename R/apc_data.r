@@ -1,7 +1,24 @@
 #######################################################
 #	apc package
-#	Bent Nielen, 27 August 2014, version 1
-#	Data examples
+#	Bent Nielsen, 18 Mar 2015, version 1.0.3
+#	Data list and Data examples
+#######################################################
+#	Copyright 2014, 2015 Bent Nielsen
+#	Nuffield College, OX1 1NF, UK
+#	bent.nielsen@nuffield.ox.ac.uk
+#
+#	This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #######################################################
 
 ###############################
@@ -59,8 +76,6 @@ return(list(rates		=rates			,
 			per.max	=NULL				,
 			time.adjust	=0				))
 }	#	data.Japanese.breast.cancer
-
-
 
 ##################################
 #	ITALIAN BLADDER CANCER DATA
@@ -182,7 +197,6 @@ return(list(rates		=rates[,index.col]			,
 			time.adjust	=0						))
 }	#	data.Belgian.lung.cancer
 
-
 ##################################
 #	UK Asbestos data
 ##################################
@@ -258,8 +272,195 @@ return(list(response		=cases[,index.columns]	,
 			time.adjust		=0				))
 }	#	data.asbestos						
 
+###############################
+#	MOTOR DATA
+###############################
+data.loss.VNJ	<- function()
+#	BN, 6 Feb 2015
+#	A Chain-Ladder with A,C effects
+#
+#	Taken from tables 1,2 of
+#	Verrall R, Nielsen JP, Jessen AH (2010)
+#	Prediction of RBNS and IBNR claims using claim amounts and claim counts
+#	ASTIN Bulletin 40, 871-887
+#
+#	Also analysed in 
+#
+#	Martinez Miranda MD, Nielsen B, Nielsen JP and Verrall R (2011)
+#	Cash flow simulation for a model of outstanding liabilities based on claim amounts and claim numbers
+#	ASTIN Bulletin 41, 107-129
+#
+#	Kuang D, Nielsen B, Nielsen JP (2015)
+#	The geometric chain-ladder
+#	Scandinavian Acturial Journal, to appear
+#
+#	Data from Codan, Danish subsiduary of Royal & Sun Alliance 
+#	Portfolio of motor policies: third party liability
+#	Units in years
+#	X Paid run-off triangle
+#	N Number of reported claims
+{	#	data.loss.VNJ
+#	dimension
+k		<- 10
+#	Number of reported claims
+Nvec	<- c(	6238  , 831   , 49    , 7     , 1 , 1 , 2 , 1 , 2 , 3 ,
+				7773  , 1381  , 23    , 4     , 1 , 3 , 1 , 1 , 3 ,  
+				10306 , 1093  , 17    , 5     , 2 , 0 , 2 , 2 ,    
+				9639  , 995   , 17    , 6     , 1 , 5 , 4 ,    
+				9511  , 1386  , 39    , 4     , 6 , 5 ,     
+				10023 , 1342  , 31    , 16    , 9 ,  
+				9834  , 1424  , 59    , 24    ,   
+				10899 , 1503  , 84    ,       
+				11954 , 1704  ,
+				10989 )
+#	X	as a vector
+Xvec	<- c(   451288 , 339519 , 333371 , 144988 , 93243  , 45511  , 25217 , 20406 , 31482 , 1729 ,
+			    448627 , 512882 , 168467 , 130674 , 56044  , 33397  , 56071 , 26522 , 14346 ,     
+			    693574 , 497737 , 202272 , 120753 , 125046 , 37154  , 27608 , 17864 ,       
+			    652043 , 546406 , 244474 , 200896 , 106802 , 106753 , 63688 ,       
+			    566082 , 503970 , 217838 , 145181 , 165519 , 91313  ,      
+			    606606 , 562543 , 227374 , 153551 , 132743 ,        
+			    536976 , 472525 , 154205 , 150564 ,        
+			    554833 , 590880 , 300964 ,          
+			    537238 , 701111 ,           
+			    684944 )     
+return(list(response	=vector.2.triangle(Xvec,k)	,
+			counts		=vector.2.triangle(Nvec,k)	,
+			dose		=NULL						,
+			data.format	="CL"						,
+			age1		=1							,
+			per1		=NULL						,
+			coh1		=1							,
+			unit		=1							,
+			per.zero	=NULL						,
+			per.max	=NULL							,
+			time.adjust	=0							))
+}	#	data.loss.VNJ
+
+###############################
+#	LOSS TRIANGLE DATA
+###############################
+data.loss.BZ	<- function()
+#	BN, 7 Feb 2015
+#	A Loss Triangle with A,P,C effects
+#
+#	Taken from table 3.5 of
+#   Barnett, G. and Zehnwirth, B. (2000). Best estimates for reserves.
+#	Proc. Casualty Actuar. Soc. 87, 245--321.
+#
+#	Also analysed in 
+#
+#	Kuang D, Nielsen B and Nielsen JP (2011)
+#	Forecasting in an extended chain-ladder-type model
+#	Journal of Risk and Insurance 78, 345-359
+#
+#	BZ write: "loss development array with a major trend change between payment years 1984 and 1985"
+#	Time in years
+#	X Paid run-off triangle
+{	#	data.loss.BZ
+#	dimension
+k		<- 11
+#	X	as a vector
+Xvec	<- c(   153638,	188412,	134534,	 87456,	 60348,	42404,	31238,	21252,	16622,	14440,	12200,
+			    178536,	226412,	158894,	104686,	 71448,	47990,	35576,	24818,	22662,	18000,        
+			    210172,	259168,	188388,	123074,	 83380,	56086,	38496,	33768,	27400,                
+			    211448,	253482,	183370,	131040,	 78994,	60232,	45568,	38000,                        
+			    219810,	266304,	194650,	120098,	 87582,	62750,	51000,                                
+			    205654,	252746,	177506,	129522,	 96786,	82400,                                        
+			    197716,	255408,	194648,	142328,	105600,                                               
+			    239784,	329242,	264802,	190400,                                                       
+			    326304,	471744,	375400,                                                               
+			    420778,	590400,                                                                       
+				496200)
+Exposure	<- c(     2.2,    2.4,	   2.2,	   2.0,	   1.9,	  1.6,    1.6,    1.8,    2.2,    2.5,    2.6)				
+return(list(response	=vector.2.triangle(Xvec,k)	,
+			exposure	=Exposure					,
+			dose		=NULL						,
+			data.format	="CL"						,
+			age1		=1977						,
+			per1		=NULL						,
+			coh1		=1							,
+			unit		=1							,
+			per.zero	=NULL						,
+			per.max		=NULL						,
+			time.adjust	=0							))
+}	#	data.loss.BZ
+
+###############################
+#	LOSS TRIANGLE DATA
+###############################
+data.loss.TA	<- function()
+#	BN, 18 mar 2015
+#	A Loss Triangle with A,C effects and over-dispersion
+#
+#	Attributed to
+#	Taylor and Ashe
+#
+##	Analysed in
+#
+#	Verrall, R.J. (1991)
+#	On the estimation of reserves from loglinear models
+#	Insurance: Mathematics and Economics 10, 75-80
+#
+#	England, P., Verrall, R.J. (1999)
+#	Analytic and bootstrap estimates of prediction errors in claims reserving
+#	Insurance: Mathematics and Economics 25, 281-293
+#
+#	X Paid run-off triangle
+{	#	data.loss.BZ
+#	dimension
+k		<- 10
+#	X	as a vector
+Xvec	<- c(	357848,	766940, 610542, 482940, 527326, 574398, 146342, 139950, 227229,  67948,
+				352118, 884021, 933894,1183289, 445745, 320996, 527804, 266172, 425046,
+				290507,1001799, 926219,1016654, 750816, 146923, 495992, 280405,
+				310608,1108250, 776189,1562400, 272482, 352053, 206286,
+				443160, 693190, 991983, 769488, 504851, 470639,
+				396132, 937085, 847498, 805037, 705960,
+				440832, 847631,1131398,1063269,
+				359480,1061648,1443370,
+				376686, 986608,
+				344014)
+return(list(response	=vector.2.triangle(Xvec,k)	,
+			dose		=NULL						,
+			data.format	="CL"						,
+			age1		=1							,
+			per1		=NULL						,
+			coh1		=1							,
+			unit		=1							,
+			per.zero	=NULL						,
+			per.max		=NULL						,
+			time.adjust	=0							))
+}	#	data.loss.TA
+
+vector.2.triangle	<- function(v,k)
+#	BN 7 Feb 2015
+#	function to organise a vector as a triangle.
+#	useful for reserving data
+#	in:		v		vector. Length k*(k+1)/2
+#			k		integer. Dimension	
+#	out:	m		matrix with "CL" format Dimension kxk.
+#					Upper left triangle filled by v, row by row.
+#					Remaining entries NA
+{	#	vector.2.triangle	
+	##############################
+	#	Check input
+	if(is.vector(v)==FALSE)		return(cat("vector.2.triangle: v is not a vector \n"))
+	if(length(v) != k*(k+1)/2)	return(cat("vector.2.triangle: Length of v does not match k\n"))
+	##############################
+	#	turn into matrix
+	m	<- matrix(nrow=k,ncol=k,data=NA)
+	i	<- 0
+	for(coh in 1:k)
+	{
+		m[coh,1:(k+1-coh)]	<- v[(i+1):(i+k+1-coh)]
+		i	<- i+k+1-coh
+	}
+	return(m)
+}	#	vector.2.triangle	
+
 apc.data.list	<- function(response, data.format, dose=NULL, age1=1, per1=1, coh1=1, unit=1, per.zero=NULL, per.max=NULL, time.adjust=0)
-#	BN 25 oct 2013
+#	BN 6 feb 2015
 #	This function constructs list of apc.data.list type.
 #	This gives the user a single focus for entering information about the data.
 #	Only response and data.format are obligatory input.
@@ -270,7 +471,6 @@ apc.data.list	<- function(response, data.format, dose=NULL, age1=1, per1=1, coh1
 #									"AC"		has    age/cohort as increasing row/column index
 #									"CA"		has cohort/age    as increasing row/column index
 #									"CL"		has cohort/age 	  as increasing row/column index, triangular
-#									"CL.vector.by.row"		row-wise vector version of "CL"
 #									"CP"		has cohort/period as increasing row/column index
 #									"PA"		has period/age    as increasing row/column index
 #									"PC"		has period/cohort as increasing row/column index
@@ -291,18 +491,19 @@ apc.data.list	<- function(response, data.format, dose=NULL, age1=1, per1=1, coh1
 {	#	apc.data.list
 	##############################
 	#	check obligatory input
-	if(is.matrix(response)==FALSE)
-		return(cat("apc.error: response is not a matrix \n"))
-	data.format.list	<- c("AP","AC","CA","CL","CL.vector.by.row","CP","PA","PC","trap","trapezoid")
+	data.format.list		<- c("AP","AC","CA","CL","CL.vector.by.row","CP","PA","PC","trap","trapezoid")
+	data.format.list.matrix	<- c("AP","AC","CA","CL","CP","PA","PC","trap","trapezoid")
 	if(isTRUE(data.format %in% data.format.list)==FALSE)
 		return(cat("apc.error: model.family has wrong argument \n"))
+	if(isTRUE(data.format %in% data.format.list.matrix)==TRUE && is.matrix(response)==FALSE)
+		return(cat("apc.error: response is not a matrix \n"))
 	#	check "CL" input
 	if(data.format=="CL")
 	{
 		if(ncol(response) != nrow(response))	return(cat("apc.error: Response matrix is not square \n"))
 		k	<- nrow(response)
 		for(age in 2:k)
-			for(coh in (k+1-age):k)
+			for(coh in (k+2-age):k)
 				if(is.na(response[coh,age])==FALSE) return(cat("apc.error: Lower triangle of response matrix should be NA \n"))
 	}		
 

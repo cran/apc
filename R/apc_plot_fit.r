@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 27 Aug 2014, version 1
+#	Bent Nielsen, 3 Apr 2015, version 1.0.3
 #	function to plot fit
 #######################################################
-#	Copyright 2014 Bent Nielsen
+#	Copyright 2014, 2015 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -26,13 +26,16 @@
 ###########################################
 
 apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detrend",sub.plot=NULL,main.outer=NULL,main.sub=NULL,cex=NULL,cex.axis=NULL)
-#	BN 23 Aug 2014
+#	BN 3 Apr 2015
 #	in		apc.fit.model	list
 #			type			character
 #								"detrend"
 #								"sum.sum"
 #								"dif"
 {	#	apc.plot.fit
+	#################
+	#	change type
+	if(type=="ss.dd")	type<-"sum.sum"
 	#################
 	#	get values from fit
 	coefficients.canonical	<- apc.fit.model$coefficients.canonical	
@@ -51,6 +54,8 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 	age.max					<- apc.fit.model$age.max
 	per.max					<- apc.fit.model$per.max
 	coh.max					<- apc.fit.model$coh.max	
+	per.odd					<- apc.fit.model$per.odd
+	U						<- apc.fit.model$U
 	#################
 	# 	identify fit
 	apc.id	<- apc.identify(apc.fit.model)
@@ -154,18 +159,22 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		l.coefficients[[2]]	<- coefficients.canonical[index.per,]
 		l.coefficients[[3]]	<- coefficients.canonical[index.coh,]
 		if(type=="detrend")
-			coefficients.sum.sum	<- coefficients.detrend
+		{	coefficients.sum.sum	<- coefficients.detrend
+			UU	<- 1
+		}
 		if(type=="sum.sum")
-			coefficients.sum.sum	<- coefficients.ssdd
+		{	coefficients.sum.sum	<- coefficients.ssdd
+			UU <- U
+		}
 		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
-			l.coefficients[[4]]	<- matrix(data=seq(0,age.max-1)  ,nrow=age.max,ncol=1) %*% coefficients.sum.sum[2,]
+			l.coefficients[[4]]	<- matrix(data=seq(1,age.max)-UU  		,nrow=age.max,ncol=1) %*% coefficients.sum.sum[2,]
 		if(model.design %in% c("P","tP"))									
-			l.coefficients[[4]]	<- matrix(data=seq(0,per.max-1)  ,nrow=per.max,ncol=1) %*% coefficients.sum.sum[2,]
-		l.coefficients[[5]]		<- matrix(data=c(1,1)		     ,nrow=2	  ,ncol=1) %*% coefficients.sum.sum[1,]
+			l.coefficients[[4]]	<- matrix(data=seq(1,per.max)-per.odd-1	,nrow=per.max,ncol=1) %*% coefficients.sum.sum[2,]
+		l.coefficients[[5]]		<- matrix(data=c(1,1)		       		,nrow=2	     ,ncol=1) %*% coefficients.sum.sum[1,]
 		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t"))
-			l.coefficients[[6]]	<- matrix(data=seq(0,coh.max-1)  ,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[3,]
+			l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 		,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[3,]
 		if(model.design %in% c("C","tC"))									
-			l.coefficients[[6]]	<- matrix(data=seq(0,coh.max-1)  ,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[2,]
+			l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 	 	,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[2,]		
 		l.coefficients[[7]]	<- coefficients.sum.sum[index.age.max,]
 		l.coefficients[[8]]	<- coefficients.sum.sum[index.per.max,]
 		l.coefficients[[9]]	<- coefficients.sum.sum[index.coh.max,]
@@ -276,6 +285,8 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 			#	set ylim
 			y.lower	<- min(0,min(function.scale(est,scale)),max(2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE)))
 			y.upper	<- max(0,max(function.scale(est,scale)),min(2*max(function.scale(est,scale)),min(function.scale(sdv0+sdv,scale),na.rm=TRUE)))
+			if(max(est)-min(est)<min(sdv,na.rm=TRUE)/2)
+				cat("apc.plot.fit warning: sdv large in for plot",i,"- possibly not plotted\n")
 			################
 			#	remove tick marks if intercept
 			xaxt="s"
@@ -305,8 +316,8 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 			sdv0	<- (1-sdv.at.zero)*est		
 			################
 			#	set ylim
-			y.lower	<- min(0,min(function.scale(est,scale)),max(2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE)))
-			y.upper	<- max(0,max(function.scale(est,scale)),min(2*max(function.scale(est,scale)),min(function.scale(sdv0+sdv,scale),na.rm=TRUE)))
+			y.lower	<- min(0,min(function.scale(est,scale)),max( 2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
+			y.upper	<- max(0,max(function.scale(est,scale)),min( 2*max(function.scale(est,scale)),min(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
 			################
 			#	remove tick marks if intercept
 			xaxt="s"
@@ -334,10 +345,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		for(i in 1:9)
 		{		
 			if(v.do.plot[i]==TRUE)
-			{
-			
 				function.plot.est.sdv(l.dates[[i]],l.coefficients[[i]],xlab=v.xlab[i],main=v.main.sub[i],intercept=v.intercept[i],tau=v.tau[i],scale=scale,sdv.at.zero=sdv.at.zero,cex=cex,cex.axis=cex.axis)
-			}
 			else
 				frame()
 		}		
@@ -368,7 +376,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 ##################################################
 
 apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,24,25),col=c("black","green","blue","red"),bg=NULL,cex=NULL,main=NULL)
-#	BN 30 Nov 2013
+#	BN 7 feb 2015
 #	in		apc.fit.model		output from apc.fit.model
 {	#	apc.plot.fit.pt
 	####################
@@ -378,6 +386,7 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 	v.response		<- apc.fit.model$response[apc.fit.model$index.data]
 	v.dose			<- apc.fit.model$dose[apc.fit.model$index.data]
 	model.family	<- apc.fit.model$model.family
+	data.format		<- apc.fit.model$data.format
 	n.data			<- apc.fit.model$n.data
 	unit			<- apc.fit.model$unit		
 	xmax			<- apc.fit.model$data.xmax	
@@ -387,6 +396,7 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 	x1				<- apc.fit.model$data.x1	
 	y1				<- apc.fit.model$data.y1	
 	dispersion		<- apc.fit.model$dispersion
+	sigma2			<- apc.fit.model$sigma2
 	####################
 	#	get probability transform
 	pt.fit			<- matrix(data=NA,nrow=n.data,ncol=1)
@@ -395,11 +405,14 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 			pt.fit[row,]	<- ppois(v.response[row],v.fitted.values[row])
 	if(isTRUE(model.family=="gaussian.response"))
 		for(row in 1:n.data)
-			pt.fit[row,]	<- pnorm(v.response[row],v.fitted.values[row],dispersion)
+			pt.fit[row,]	<- pnorm(v.response[row],v.fitted.values[row],sqrt(sigma2))
 	if(isTRUE(model.family=="binomial.dose.response"))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- pbinom(v.response[row],v.dose[row],v.fitted.values[row])
-	m.pt.fit	<- matrix(data=NA,nrow=xmax,ncol=ymax)
+	if(isTRUE(model.family=="log.normal.response"))
+		for(row in 1:n.data)
+			pt.fit[row,]	<- pnorm(log(v.response[row]),v.fitted.values[row],sqrt(sigma2))
+	m.pt.fit	<- matrix(data=NA,nrow=xmax,ncol=ymax)	
 	m.pt.fit[index.data]	<- pt.fit
 	####################
 	#	OPTIONAL PLOT
@@ -413,7 +426,8 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 		####################
 		#	limits for axes
 		xlim	<- c(x1,x1 +(xmax-1)*unit)
-		ylim	<- c(y1,y1 +(ymax-1)*unit)
+		if(data.format=="CL")	ylim	<- c(y1 +(ymax-1)*unit,y1)	
+		else					ylim	<- c(y1,y1 +(ymax-1)*unit)
 		####################
 		#	plot parameters
 		par(mfrow=c(1,1))		
@@ -424,16 +438,19 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 		for(row in 1:xmax)
 			for(column in 1:ymax)
 			{
-				x	<- x1+(row-1)*unit			#	get x coordinate
+				x	<- x1+(row-1)*unit				#	get x coordinate
 				y	<- y1+(column-1)*unit			#	get y coordinate
-				z	<- m.pt.fit[row,column]		#	get probability transform of fit
-				if(z>0.99) 				points(x,y,pch=pch[3],cex=cex,col=col[4],bg=bg[4])
-				if(z>0.95 & z<=0.99)	points(x,y,pch=pch[3],cex=cex,col=col[3],bg=bg[3])
-				if(z>0.90 & z<=0.95)	points(x,y,pch=pch[3],cex=cex,col=col[2],bg=bg[2])
-				if(z>0.10 & z<=0.90)	points(x,y,pch=pch[1],cex=cex,col=col[1],bg=bg[1])
-				if(z>0.05 & z<=0.10)	points(x,y,pch=pch[2],cex=cex,col=col[2],bg=bg[2])
-				if(z>0.01 & z<=0.05)	points(x,y,pch=pch[2],cex=cex,col=col[3],bg=bg[3])
-				if(	   	    z<=0.01) 	points(x,y,pch=pch[2],cex=cex,col=col[4],bg=bg[4])
+				z	<- m.pt.fit[row,column]			#	get probability transform of fit
+				if(is.na(z)==FALSE)
+				{				
+					if(z>0.99) 				points(x,y,pch=pch[3],cex=cex,col=col[4],bg=bg[4])
+					if(z>0.95 & z<=0.99)	points(x,y,pch=pch[3],cex=cex,col=col[3],bg=bg[3])
+					if(z>0.90 & z<=0.95)	points(x,y,pch=pch[3],cex=cex,col=col[2],bg=bg[2])
+					if(z>0.10 & z<=0.90)	points(x,y,pch=pch[1],cex=cex,col=col[1],bg=bg[1])
+					if(z>0.05 & z<=0.10)	points(x,y,pch=pch[2],cex=cex,col=col[2],bg=bg[2])
+					if(z>0.01 & z<=0.05)	points(x,y,pch=pch[2],cex=cex,col=col[3],bg=bg[3])
+					if(	   	    z<=0.01) 	points(x,y,pch=pch[2],cex=cex,col=col[4],bg=bg[4])
+				}
 			}
 	}
 	####################

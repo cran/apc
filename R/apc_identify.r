@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 23 Aug 2014, version 0.14
+#	Bent Nielsen, 3 April 2015, version 1.1
 #	functions to identify parameters
 #######################################################
-#	Copyright 2014 Bent Nielsen
+#	Copyright 2014,2015 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -25,7 +25,7 @@
 #	apc.identify
 #########################################################
 apc.identify	<- function(apc.fit.model)
-#	23 Aug 2014
+#	3 Mar 2015
 #	In:		apc.fit.model			list		from apc.fit.model
 #	Out:	index.age.max	 		vector. 	Indices for identified age parameters 
 #			index.per.max			vector. 	Indices for identified period parameters 
@@ -59,6 +59,8 @@ apc.identify	<- function(apc.fit.model)
 	coh1			<- apc.fit.model$coh1
 	unit			<- apc.fit.model$unit
 	per.zero		<- apc.fit.model$per.zero
+	per.odd			<- apc.fit.model$per.odd
+	U				<- apc.fit.model$U
 	age.max			<- apc.fit.model$age.max
 	per.max			<- apc.fit.model$per.max
 	coh.max			<- apc.fit.model$coh.max
@@ -136,29 +138,31 @@ apc.identify	<- function(apc.fit.model)
 	#		+ sum sum DD age 	[padded with zeros]
 	#		+ sum sum DD period	[padded with zeros]
 	#		+ sum sum DD cohort	[padded with zeros]
-	#
 	#	a summation function is needed
+	#	for sum sum DD age:		use with U=U
+	#	for sum sum DD cohort:	use with U=U
+	#	for sum sum DD period, L=per.odd=TRUE:	use with U=2
+	#	for sum sum DD period, L=per.odd=FALSE:	use with U=1	
 	function.ssdd	<- function(n,U)
-	#	BN, 11 sep 2013
+	#	BN, 4 mar 2015
 	#	U is the anchoring point in the summation
 	{	#	function.ssdd
 		m	<- matrix(data=0,nrow=n+2,ncol=n)
-		if(U>0)
-			for(row in 1:U)
-				m[row,row:U]	<- seq(1,U-row+1)
-		for(row in (U+3):(n+2))
-			m[row,(U+1):(row-2)]	<- seq(row-U-2,1)
+		if(U>1)
+			for(row in 1:(U-1))
+				m[row,row:(U-1)]	<- 1:(U-row)	
+		if(U<n+1)		
+			for(row in (U+2):(n+2))
+				m[row,U:(row-2)]	<- (row-U-1):1	
 		return(m)	
 	}	#	function.ssdd
 	##############################
 	#	declare linear transformation matrix
 	m.ssdd	<-	matrix(data=0,nrow=xi.max,ncol=xi)									
 	m.ssdd[1:det.max,1:det.max]	<- diag(det.max)							#	level/trend terms
-	even.per.zero	<- per.zero %% 2	#	0/1 if per.zero is even/odd		#	used for beta's
-	U	<- (per.zero+even.per.zero)/2
-	if(difdif[1])	m.ssdd[index.age.max,index.age]	<- function.ssdd(age.max-2,U)					#	alpha
-	if(difdif[2])	m.ssdd[index.per.max,index.per]	<- function.ssdd(per.max-2,even.per.zero)		#	beta noting that 2U-per.zero=even.per.zero
-	if(difdif[3])	m.ssdd[index.coh.max,index.coh]	<- function.ssdd(coh.max-2,U)					# 	gamma
+	if(difdif[1])	m.ssdd[index.age.max,index.age]	<- function.ssdd(age.max-2,U)			#	alpha
+	if(difdif[2])	m.ssdd[index.per.max,index.per]	<- function.ssdd(per.max-2,per.odd+1)	#	beta 
+	if(difdif[3])	m.ssdd[index.coh.max,index.coh]	<- function.ssdd(coh.max-2,U)			# 	gamma
 	##############################
 	#	get linear transformation matrix
 	#		from standard representation
@@ -169,51 +173,52 @@ apc.identify	<- function(apc.fit.model)
 	#
 	#	a detrending function is needed
 	function.detrend	<- function(n)
-	#	BN, 3 sep 2013
+	#	BN, 3 apr 2015
 	#	in:		n			is the dimension
-	#	Out		m			matrix of dimension n+2 x n
+	#	Out		m			matrix of dimension n x n
 	#						for detrending an n vector,
-	#						the first n rows gives coefficients detrended vector
-	#						so that first and last (n) element is zero
-	#						the second last row gives intercept
-	#						the last row gives slope
+	#						takes an identity matrix
+	#						replaces first column with (col-n)/(n-1)
+	#						replaces  last column with (1-col)/(n-1)
 	{	#	function.detrend
-		n1		<- n-1
-		n2		<- n-2
-		#	m defines the detrending	
-		m		<- matrix(data=0,nrow=n+2,ncol=n)
-		m[2:n1,1]		<- -seq(n2,1)/n1;	m[2:n1,n]	<- -seq(1,n2)/n1;
-		m[2:n1,2:n1]	<- diag(n2);
-		m[n+1,1]		<-  n/n1;			m[n+1,n]	<- -1/n1;
-		m[n+2,1]		<- -1/n1;			m[n+2,n]	<-  1/n1;
+		#	m defines the detrending
+		m			<- diag(n);
+		m[1:n,1]	<- (seq(1:n)-n)/(n-1);
+		m[1:n,n]	<- (1-seq(1:n))/(n-1);
+		m[1,1]		<- 0;
+		m[n,n]		<- 0;
 		return(m)
 	}	#	function.detrend
 	#	declare linear transformation matrix
 	m.detrend	<-	diag(xi.max)
+	#	move anchoring of linear trend from U to 1.
+	if(sum(slopes)==2)
+		m.detrend[1,2:3]	<- 1-U
+	if(sum(slopes)==1 && !slopes[2])
+		m.detrend[1,2]		<- 1-U
+	#	detrend age effects, move linear trend to deterministics
 	if(difdif[1])
-	{
-		m.a	<- function.detrend(age.max)
-		m.detrend[  index.age.max,index.age.max]	<- m.a[1:age.max,]
-		m.detrend[1,index.age.max]   				<- m.a[age.max+1,]+	m.a[age.max+2,]
-		m.detrend[2,index.age.max]   				<- 					m.a[age.max+2,]
+	{	m.detrend[1,index.age.max[1]]	<- 1
+		m.detrend[2,index.age.max[c(1,age.max)]]	<- c(-1,1)/(age.max-1)
+		m.detrend[index.age.max,index.age.max]	<- function.detrend(age.max)		
 	}
 	if(difdif[3])
 	{	# there are 2 slopes if slopes=c(1,0,1)
 		# there is  1 slope  if slopes=c(0,0,1)
-		m.c	<- function.detrend(coh.max)
-		m.detrend[  index.coh.max,index.coh.max]	<- m.c[1:coh.max,]
-		m.detrend[1,index.coh.max]   				<- m.c[  coh.max+1,]+	m.c[coh.max+2,]
-		m.detrend[det.max,index.coh.max]   			<- 						m.c[coh.max+2,]
+		# recall det.max <- 1+sum(slopes)
+		m.detrend[1,index.coh.max[1]]	<- 1
+		m.detrend[det.max,index.coh.max[c(1,coh.max)]]	<- c(-1,1)/(coh.max-1)
+		m.detrend[index.coh.max,index.coh.max]	<- function.detrend(coh.max)		
 	}
 	if(difdif[2])
 	{	# if slopes=c(1,0,1) the period slope gives age & cohort slopes with equal weight
-		# if slopes=c(0,1,0) the period slope gives a period     slope	
-		m.p	<- function.detrend(per.max)
-		m.detrend[  index.per.max,index.per.max]	<- m.p[1:per.max,]
-		m.detrend[1,index.per.max]   				<- m.p[  per.max+1,]+	m.p[per.max+2,]
-		if(slopes[1])	m.detrend[2,index.per.max]  <- 						m.p[per.max+2,]
-		if(slopes[2])	m.detrend[2,index.per.max]  <- 						m.p[per.max+2,]
-		if(slopes[3])	m.detrend[3,index.per.max]  <- 						m.p[per.max+2,]
+		# if slopes=c(0,1,0) the period slope gives a period     slope
+		if(!slopes[2])  m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)+c(1,-1)*per.zero/(per.max-1)
+		if(slopes[2]) 	m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)
+		if(slopes[1])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+		if(slopes[2])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+		if(slopes[3])	m.detrend[3,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+		m.detrend[index.per.max,index.per.max]	<- function.detrend(per.max)		
 	}
 	##############################	
 	##############################
@@ -260,9 +265,9 @@ apc.identify	<- function(apc.fit.model)
 	coefficients.ssdd[,2]		<- sqrt(diag(covariance.ssdd   ))
 	coefficients.detrend[,2]	<- sqrt(diag(covariance.detrend))
 	#	set NA for ad hoc identified entries
-	if(difdif[1])	coefficients.ssdd[   index.age.max,2][(U+1):(U+2)]	<- NA
-	if(difdif[2])	coefficients.ssdd[   index.per.max,2][(even.per.zero+1):(even.per.zero+2)]	<- NA
-	if(difdif[3])	coefficients.ssdd[   index.coh.max,2][(U+1):(U+2)]	<- NA
+	if(difdif[1])	coefficients.ssdd[   index.age.max,2][U:(U+1)]	<- NA
+	if(difdif[2])	coefficients.ssdd[   index.per.max,2][(per.odd+1):(per.odd+2)]	<- NA
+	if(difdif[3])	coefficients.ssdd[   index.coh.max,2][U:(U+1)]	<- NA
 	if(difdif[1])	coefficients.detrend[index.age.max,2][c(1,age.max)]	<- NA                           
 	if(difdif[2])	coefficients.detrend[index.per.max,2][c(1,per.max)]	<- NA   
 	if(difdif[3])	coefficients.detrend[index.coh.max,2][c(1,coh.max)]	<- NA                           
@@ -401,3 +406,4 @@ apc.identify	<- function(apc.fit.model)
 				covariance.dif			= covariance.dif		 
 		))
 }	#	apc.identify
+

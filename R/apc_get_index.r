@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 27 Aug 2014, version 1
+#	Bent Nielsen, 31 Mar 2015, version 1.0.3
 #	function to get indices of data and to generate sub sets of data
 #######################################################
-#	Copyright 2014 Bent Nielsen
+#	Copyright 2014, 2015 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -22,7 +22,7 @@
 #######################################################
 
 apc.get.index	<- function(apc.data.list)
-#	BN 18 nov 2013
+#	BN 6 Feb 2015
 #	function to get indices to keep track of estimation and labelling
 #	in:		apc.data.list
 #	out:	list 
@@ -136,10 +136,10 @@ apc.get.index	<- function(apc.data.list)
 	{	k	<- min(nrow(response),ncol(response))
 		##############################
 		#	check obligatory input
-		if(ncol(response) != nrow(response))	return(cat("apc.error: Response matrix is not square \n"))
+		if(ncol(response) != nrow(response))	return(cat("apc.get.index error: Response matrix is not square \n"))
 		for(age in 2:k)
-			for(coh in (k+1-age):k)
-				if(is.na(response[coh,age])==FALSE) return(cat("apc.error: Lower triangle of response matrix should be NA \n"))
+			for(coh in (k+2-age):k)
+				if(is.na(response[coh,age])==FALSE) return(cat("apc.get.index error: Lower triangle of response matrix should be NA \n"))
 		##############################
 		nrow		<- k
 		ncol		<- k
@@ -167,41 +167,46 @@ apc.get.index	<- function(apc.data.list)
 		data.x1	<- coh1
 		data.y1	<- age1
 	}
-	#########################
-	if(data.format=="CL.vector.by.row")
-	#	square matrix with cohort/age as increasing row/column index
-	#	NA: in botton right triangle so period >= age.max+period.max
-	{	##############################
-		#	check obligatory input
-		if(is.vector(data.matrix)==FALSE)	return(cat("apc.error: Response is not a vector \n"))
-		##############################
-		k			<- as.integer((sqrt(1+8*length(data.matrix))-1)/2)
-		n.data		<- k*(k+1)/2
-		nrow		<- 1
-		ncol		<- n.data
-		age.max		<- k
-		coh.max		<- k
-		per.max		<- k
-		per.zero	<- 0
-		age1		<- age1
-		coh1		<- coh1
-		per1		<- age1+coh1-time.adjust
-		index.data	<- matrix(nrow=n.data,ncol=2)
-		index.data[,1]	<- 1
-		index.data[,2]	<- seq(1,n.data)
-		index.trap	<- matrix(nrow=n.data,ncol=2)
-		col	<- 0
-		for(row in 1:nrow)
-		{
-			index.trap[(col+1):(col+k+1-row),1]	<- seq(1,k+1-row)						#	age    
-			index.trap[(col+1):(col+k+1-row),2]	<- row		  							#	cohort 
-			col	<- col +k+1-row
-		}
-		data.xlab	<- ""
-		data.ylab	<- "vec(policy/development triangle)"
-		data.x1	<- NA
-		data.y1	<- NA
-	}
+#	#########################
+#	if(data.format=="CL.vector.by.row")
+#	#	square matrix with cohort/age as increasing row/column index
+#	#	NA: in botton right triangle so period >= age.max+period.max
+#	{	##############################
+#		#	check obligatory input
+#		if(is.vector(response)==FALSE)	return(cat("apc.error: Response is not a vector \n"))
+#		##############################
+#		#	get dimension
+#		k			<- as.integer((sqrt(1+8*length(response))-1)/2)
+#		##############################
+#		#	turn into matrix
+#		response	<- t(as.matrix(response))
+#		##############################
+#		n.data		<- k*(k+1)/2
+#		nrow		<- k
+#		ncol		<- k
+#		age.max		<- k
+#		coh.max		<- k
+#		per.max		<- k
+#		per.zero	<- 0
+#		age1		<- age1
+#		coh1		<- coh1
+#		per1		<- age1+coh1-time.adjust
+#		index.data	<- matrix(nrow=n.data,ncol=2)
+#		index.data[,1]	<- 1
+#		index.data[,2]	<- seq(1,n.data)
+#		index.trap	<- matrix(nrow=n.data,ncol=2)
+#		col	<- 0
+#		for(row in 1:nrow)
+#		{
+#			index.trap[(col+1):(col+k+1-row),1]	<- seq(1,k+1-row)						#	age    
+#			index.trap[(col+1):(col+k+1-row),2]	<- row		  							#	cohort 
+#			col	<- col +k+1-row
+#		}
+#		data.xlab	<- ""
+#		data.ylab	<- "vec(policy/development triangle)"
+#		data.x1	<- NA
+#		data.y1	<- NA
+#	}
 	#########################
 	if(data.format=="CP")
 	#	matrix with cohort/period as increasing row/column index
@@ -323,10 +328,13 @@ apc.get.index	<- function(apc.data.list)
 		data.x1	<- age1
 		data.y1	<- coh1
 	}
-
 	#########################
 	#	GENERAL CODE
 	#########################
+	#	get anchoring
+	if(per.zero %% 2==0)	{	U <- (per.zero+2)%/% 2;	per.odd <- FALSE;	} 
+	else					{	U <- (per.zero+3)%/% 2;	per.odd <- TRUE; 	} 
+	########################
 	return(list(response	=response	,	 #	argument
 				dose		=dose		,	 #	argument
 				data.format	=data.format,	 #	argument
@@ -344,6 +352,8 @@ apc.get.index	<- function(apc.data.list)
 				per.max		=per.max	,
 				coh.max		=coh.max	,
 				per.zero	=per.zero	,
+				per.odd		=per.odd	,
+				U			=U			,
 				age1		=age1		,
 				per1		=per1		,
 				coh1		=coh1	 	))
@@ -470,79 +480,3 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 				per.max		=per.max.new		,
 				time.adjust	=0					))		
 }	#	apc.data.list.subset
-
-
-#####################################################
-#apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
-#											   per.cut.lower=0,per.cut.upper=0,
-#											   coh.cut.lower=0,coh.cut.upper=0,apc.index=NULL)
-##	BN 4 dec 2013
-##	function to get subset of data set
-##	in:		apc.data.list
-##	out:	list 
-#{	#	apc.data.list.subset
-#	######################
-#	#	get index
-#	if(is.null(apc.index)==TRUE)
-#		apc.index	<- apc.get.index(apc.data.list)
-#	##############################
-#	#	get data.list values, that are used
-#	response	<- apc.data.list$response
-#	dose		<- apc.data.list$dose
-#	##############################
-#	#	get index values, that are used
-#	age.max		<- apc.index$age.max				
-#	per.max		<- apc.index$per.max				
-#	coh.max		<- apc.index$coh.max
-#	age1		<- apc.index$age1    
-#	per1		<- apc.index$per1    
-#	coh1		<- apc.index$coh1    
-#	unit		<- apc.index$unit
-#	per.zero	<- apc.index$per.zero
-#	index.data	<- apc.index$index.data
-#	index.trap	<- apc.index$index.trap
-#	##############################
-#	#	get new indices
-#	age.cut.lower	<- max(age.cut.lower,per.zero+per.cut.lower+1-coh.max+coh.cut.upper)
-#	coh.cut.lower	<- max(coh.cut.lower,per.zero+per.cut.lower+1-age.max+age.cut.upper)
-#	per.zero.new	<- max(per.zero+per.cut.lower-age.cut.lower-coh.cut.lower,0)
-#	age.cut.upper	<- max(age.cut.upper,coh.cut.lower+age.max-per.zero-per.max)
-#	coh.cut.upper	<- max(coh.cut.upper,age.cut.lower+coh.max-per.zero-per.max)
-#	age.max.new		<- age.max-age.cut.upper-age.cut.lower
-#	coh.max.new		<- coh.max-coh.cut.upper-coh.cut.lower
-#	per.max.new		<- min(per.max+per.zero-per.cut.upper-age.cut.lower-coh.cut.lower,age.max.new+coh.max.new-1)-per.zero.new
-#	age1.new		<- age1	+ age.cut.lower*unit
-#	coh1.new		<- coh1	+ coh.cut.lower*unit
-#	per1.new		<- per1 + (per.zero.new+age.cut.lower+coh.cut.lower-per.zero)*unit
-#	##############################
-#	#	get trapezoid
-#	trap.response		<- matrix(data=NA,nrow=age.max,ncol=coh.max)
-#	trap.response.new	<- matrix(data=NA,nrow=age.max.new,ncol=coh.max.new)
-#	trap.response[index.trap]	<- response[index.data]
-#	for(age.new in 1:age.max.new)
-#		for(coh.new in 1:coh.max.new)
-#			if(age.new+coh.new>per.zero.new+1 && age.new+coh.new<per.zero.new+per.max.new+2)
-#				trap.response.new[age.new,coh.new]	<- trap.response[age.new+age.cut.lower,coh.new+coh.cut.lower]
-#	if(is.null(dose))	trap.dose.new <- NULL
-#	else
-#	{	trap.dose			<- matrix(data=NA,nrow=age.max,ncol=coh.max)
-#		trap.dose.new		<- matrix(data=NA,nrow=age.max.new,ncol=coh.max.new)
-#		trap.dose[index.trap]		<- dose[index.data]
-#		for(age.new in 1:age.max.new)
-#			for(coh.new in 1:coh.max.new)
-#				if(age.new+coh.new>per.zero.new+1 && age.new+coh.new<per.zero.new+per.max.new+2)
-#					trap.dose.new[age.new,coh.new]	<- trap.dose[age.new+age.cut.lower,coh.new+coh.cut.lower]
-#	}				
-#	return(list(response	=trap.response.new	,
-#				dose		=trap.dose.new		,
-#				data.format	="trapezoid"		,	
-#				age1		=age1.new			,
-#				per1		=per1.new			,
-#				coh1		=coh1.new			,
-#				unit		=unit				,
-#				per.zero	=per.zero.new		,
-#				per.max		=per.max.new		,
-#				time.adjust	=0					))		
-#}	#	apc.data.list.subset
-#
-#

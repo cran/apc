@@ -1,15 +1,39 @@
-
 \name{apc.identify}
 \alias{apc.identify}
-\title{Identification of double sums of canonical parameters}
-\description{This computes double sums of canonical parameters along with detrended versions of these.  }
+\title{Identification of time effects}
+\description{Computes ad hoc identified time effects.}
 \usage{apc.identify(apc.fit.model)}
 \arguments{
   \item{apc.fit.model}{List. See \code{\link{apc.fit.model}} for a description of the format.}
 }
-\details{Both types of double sums should be interpreted jointly with the linear trends.
-The double sums have two zero values at the anchoring points defined in ??
-The detrended sums start and end in zero.  They show the deviation of the time effects from linear trends.}
+\details{Forms ad hoc identified time effects from the canonical parameter.
+These are used either indirectly by \code{\link{apc.plot.fit}}
+or they are computed directly with this command.
+
+The ad hoc identifications are based on	Nielsen (2014b). For details see also
+the \href{../doc/index.html}{vignette} \href{../doc/Identification.pdf}{Identification.pdf}
+or in the notes below.
+
+For model designs of any type two ad hoc identified time effects.
+
+(1)
+The type "sum.sum" (same as "ss.dd") gives double sums anchored in the middle of
+the first period diagonal. 
+
+(2)
+The type "detrend" gives double sums that start in zero and end in zero.
+
+For model designs with only two time effects, that is "AC", "AP", "PC" there is
+a further ad hoc identification.
+
+(3)
+The type "demean" gives single sums of single differences. Derived from "detrend" where the
+linear trends are attributed to the double sums of double differences. Level unchanged.
+
+(4)
+The type "dif" gives the single differences derived from "demean".  Could also have been chosen
+as canonical parametrisation for these models.
+}
 \value{
 	\item{index.age.max		}{Vector.  Indices for age    parameters when using coefficients.ssdd or coefficients.detrend.  The length is two longer that that of \code{apc.model.fit$index.age} if \code{model.design} is "APC.  NULL if age    double differences are not estimated.}
 	\item{index.per.max		}{Vector.  Indices for period parameters when using coefficients.ssdd or coefficients.detrend.  The length is two longer that that of \code{apc.model.fit$index.per} if \code{model.design} is "APC.  NULL if age    double differences are not estimated.}
@@ -41,8 +65,47 @@ The differences are not identified for designs "Ad", "Pd", "Cd".  These models h
 double differences.  In the model "Ad", as an example, one linear trend will be associated with age, but it is
 arbitrary whether the second linear trend should be associated with period or cohort.  The slope of the age trend
 will depend on that arbitrary choice.  In turn the level of the age differences will be arbitrary.  
+
+(1)
+The type "sum.sum" (same as "ss.dd") gives double sums anchored 
+to be zero in the three points where
+\code{age=cohort=U},
+\code{age=U+1,cohort=U}
+\code{age=U,cohort=U+1}
+with
+\code{apc.fit.model$U}
+and where
+\code{U}
+is the integer value of
+\code{(per.zero+3)/2}
+This corresponds to the representation in
+Nielsen (2014b).
+The linear plane is parametrised in terms of 
+a level, which is the value of the predictor at
+\code{age=cohort=U};
+an age slope, which is the difference of the values of the predictor at
+\code{age=U+1,cohort=U}
+and 
+\code{age=cohort=U};
+an cohort slope, which is the difference of the values of the predictor at
+\code{age=U,cohort=U+1}
+and 
+\code{age=cohort=U}.
+
+(2)
+The type "detrend" gives double sums that start in zero and end in zero.
+The linear plane is parametrised in terms of
+a level, which is the value of the predictor at 
+\code{age=cohort=1}, which is usually outside the index set for the data;
+while age and cohort slopes are adjusted for the ad hoc identification of the time effects.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 23 Aug 2014}
+\references{
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+
+Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
+}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 12 Apr 2015}
+\seealso{The \href{../doc/index.html}{vignette} \href{../doc/Identification.pdf}{Identification.pdf}.}
 \examples{
 ########################
 #	Belgian lung cancer

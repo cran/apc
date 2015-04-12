@@ -5,7 +5,7 @@
 It creates index matrices to transform data between original format, trapezoid format and a vector,
 as well as values to keep track of the labels for the time scales.
 
-The generalized trapezoids are introduced in Kuang, Nielsen and Nielsen (2008).}
+The generalized trapezoids are introduced in Kuang, Nielsen and Nielsen (2008), see also Nielsen (2014).}
 \usage{apc.get.index(apc.data.list)}
 \arguments{
   \item{apc.data.list}{See \code{\link{apc.data.list}} for a description of the format}
@@ -29,14 +29,18 @@ The generalized trapezoids are introduced in Kuang, Nielsen and Nielsen (2008).}
 	\item{per.max}{Numeric.  Number of period groups.}
 	\item{coh.max}{Numeric.  Number of cohort groups.}
 	\item{per.zero}{Numeric.  Anchor for period index, so that period starts from \code{per.zero}+1.}
+	\item{per.odd}{Logic.  TRUE if per.zero is odd.}
+	\item{U}{Numeric.  Integer value of (per.zero+3)/2.}
 	\item{age1}{Numeric.  Year for smallest age index. Derived for data.format="CP", "PC", otherwise an argument.}
 	\item{per1}{Numeric.  Year for smallest period index. Derived for data.format="AC","CA","CL","CL.vector.by.row","trapezoid", otherwise an argument.}
 	\item{coh1}{Numeric.  Year for smallest cohort index. Derived for data.format="AP", "PA", otherwise an argument.}
 }
 \references{
 Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+
+Nielsen, B. (2014) Deviance analysis of age-period-cohort models.  \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 20 Nov 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 31 Mar 2015}
 \examples{
 ################
 #	Artificial data

@@ -1,0 +1,27 @@
+Package: apc
+Version: 1.1
+Date: 2015-04-04
+
+CHANGES in version 1.1
+
+New functions
+	vector.2.triangle:		For input of reserving triangles recorded in vector form
+							Data format "CL.as.vector" then dropped
+	data.loss.BZ:			Reserving triangle
+    data.loss.TA:			Reserving triangle
+    data.loss.VNJ:    		Reserving triangle	
+Improvements
+	apc.plot.data.sparsity	now allows for NA observations
+							swap order of age axis for "CL"
+	apc.plot.fit.pt			swap order of age axis for "CL"
+Bugs
+	apc.plot.fit		Constant in panel (e) corrected
+	apc.fit.model		model.design="P" corrected
+	apc.identify		Constant for type "detrend" corrected
+	
+	
+TO DO
+apc.plot.fit.pt
+	check plots for normal distributions. 
+
+ 

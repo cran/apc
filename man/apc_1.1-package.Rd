@@ -12,8 +12,8 @@ The outline of an analysis is described below.
 	\tabular{ll}{
 		Package: \tab apc\cr
 		Type: \tab Package\cr
-		Version: \tab 1.0\cr
-		Date: \tab 2014-08-27\cr
+		Version: \tab 1.1\cr
+		Date: \tab 2015-04-12\cr
 		License: \tab GPL-3\cr
 	}
 	The apc package uses the canonical parameters suggested by
@@ -33,7 +33,7 @@ The outline of an analysis is described below.
 	Forecasting is not covered as by the package as yet, but discussion can be found in
 	Kuang, Nielsen and Nielsen (2008b, 2011)
 	and
-	Martinez Miranda, Nielsen and Nielsen (2014).
+	Martinez Miranda, Nielsen and Nielsen (2015).
 
 	The apc package can be used as follows.
 	\enumerate{
@@ -79,7 +79,7 @@ The outline of an analysis is described below.
 			includes counts of deaths from mesothelioma in the UK.
 			This dataset has no measure for exposure.
 			It can be analysed using a Poisson model with an "APC" or an "AC" design.
-			Source: Martinez Miranda, Nielsen and Nielsen (2014).
+			Source: Martinez Miranda, Nielsen and Nielsen (2015).
 		\item	
 			\code{\link{data.Italian.bladder.cancer}}
 			includes counts of deaths from bladder cancer in the Italy.
@@ -100,11 +100,9 @@ The outline of an analysis is described below.
 			Source: Clayton and Schifflers (1987b).
 	}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 28 Aug 2014}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 29 Jan 2015}
 \references{
-Clayton, D. and Schifflers, E. (1987a)
-Models for temperoral variation in cancer rates. I: age-period and age-cohort models. 
-\emph{Statistics in Medicine} 6, 449-467.
+Clayton, D. and Schifflers, E. (1987a) Models for temperoral variation in cancer rates. I: age-period and age-cohort models. \emph{Statistics in Medicine} 6, 449-467.
 
 Clayton, D. and Schifflers, E. (1987b) Models for temperoral variation in cancer rates. II: age-period-cohort models. \emph{Statistics in Medicine} 6, 469-481.
 
@@ -114,13 +112,14 @@ Kuang, D., Nielsen, B. and Nielsen, J.P. (2008b) Forecasting with the age-period
 
 Kuang, D., Nielsen, B. and Nielsen, J.P. (2011) Forecasting in an extended chain-ladder-type model. Journal of Risk and Insurance 78, 345-359. \emph{Download}: \href{http://dx.doi.org/10.1111/j.1539-6975.2010.01395.x}{Article}; Earlier version: \href{http://www.nuffield.ox.ac.uk/economics/papers/2010/w5/Forecast24jun10.pdf}{Nuffield DP}. 
 
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2014) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. To appear in \emph{Journal of the Royal Statistical Society} A. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
 
-Nielsen, B. (2014a) apc: A package for age-period-cohort analysis. Work in progress.
+Nielsen, B. (2014a) apc: A package for age-period-cohort analysis. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/nielsen_apc_package.pdf}{Nuffield DP}.
 
-Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
+Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
 
-Nielsen, B. and Nielsen, J.P. (2014) Identification and forecasting in mortality models. The Scientific World Journal. vol. 2014, Article ID 347043, 24 pages. \emph{Download}: \href{http://www.hindawi.com/journals/tswj/2014/347043}{Article}.}
+Nielsen, B. and Nielsen, J.P. (2014) Identification and forecasting in mortality models. The Scientific World Journal. vol. 2014, Article ID 347043, 24 pages. \emph{Download}: \href{http://www.hindawi.com/journals/tswj/2014/347043}{Article}.
+}
 \seealso{
 Age-period-cohort analysis can alternatively be done by the package
 \code{Epi}.
