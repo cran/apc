@@ -1,1 +1,5 @@
 exportPattern("^[[:alpha:]]+")
+importFrom("grDevices", "dev.new", "gray")
+importFrom("graphics", "abline", "frame", "lines", "matplot", "mtext","par", "plot", "points", "polygon", "title")
+importFrom("stats", "binomial", "gaussian", "glm.fit", "pbinom","pchisq", "pf", "pnorm", "poisson", "ppois", "summary.glm")
+importFrom("lattice", "levelplot")

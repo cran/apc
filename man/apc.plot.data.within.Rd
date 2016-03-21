@@ -1,18 +1,37 @@
 \name{apc.plot.data.within}
 \alias{apc.plot.data.within}
+\alias{apc.plot.data.within.all.six}
 \title{This plot shows time series of matrix within age, period or cohort.}
-\description{Produces six plots showing time series of matrix within age, period or cohort against one of the other two indices.
+\description{\code{apc.plot.data.within} produces plot showing time series of matrix
+	within age, period or cohort against one of the other two indices.
+	\code{apc.plot.data.within.all.six} produces all six plots in one panel plot.
+	
 	These plots are sometimes used to gauge how many of the age, period, cohort factors are needed:
 	If lines are parallel when dropping one index the corresponding factor may not be needed.
 	In practice these plots should possibly be used with care, see Italian bladder cancer example below.}
 \usage{apc.plot.data.within(apc.data.list,
-					data.type="r",thin=NULL,apc.index=NULL,
+					data.type="r",plot.type="awc",
+					thin=NULL,apc.index=NULL,
 					ylab=NULL,type="o",log="y",legend=TRUE,
-					lty=1:5,col=1:6,bty="n",main.outer=NULL)}
+					lty=1:5,col=1:6,bty="n",main=NULL,
+					x="topleft",return=FALSE)
+apc.plot.data.within.all.six(apc.data.list,
+					data.type="r",
+					thin=NULL,apc.index=NULL,
+					ylab=NULL,type="o",log="y",legend=TRUE,
+					lty=1:5,col=1:6,bty="n",main.outer=NULL,
+					x="topleft")
+}				
 \arguments{
 	\item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
- 	\item{data.type}{Optional. Character. "r"/"d"/"m" if sums are computed for responses/dose/mortality rates, where mortality rates are found through division response/dose. "r" is default.} 
-  	\item{thin}{Optional. Numerical.  age/periods/cohorts are grouped in groups of size thin.  Default is computed from dimensions of data.  A warning is produced if dimension is not divisible by thin, so that one group is smaller than other groups.}
+ 	\item{data.type}{Optional. Character. "r"="response" / "d"="dose" / "m"="mortality"="rates"
+						if sums are computed for responses/dose/rates,
+						where rates are found through division response/dose. "r" is default.}
+	\item{plot.type}{Optional. "awp", "pwa" "awc", "cwa, "cwp", "pwc":
+						for example: "awp" gives time series in age within each period level:
+						for an AP data-array these are the column sums.}					
+  	\item{thin}{Optional. Numerical.  age/periods/cohorts are grouped in groups of size thin.
+						Default is computed from dimensions of data.  A warning is produced if dimension is not divisible by thin, so that one group is smaller than other groups.}
 	\item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
   	\item{ylab}{Optional \code{\link{plot}} argument.  Character.  Common label for y-axes. Default is "".}
 	\item{type}{Optional \code{\link{plot}} argument. Character. "o" if overlaid points and lines. "l" if lines. "p" if points. Default is "o".}
@@ -29,7 +48,10 @@
   	\item{bty}{Optional \code{\link{plot}} argument. Character.
 			The type of box to be drawn around the legend.
 			The allowed values are "n" and "o".	Default is "n".}
-  	\item{main.outer}{Optional. Character. Main title for plot, to be shown in outer margin.  Default is NULL, in which case a title is generated internally.}
+  	\item{main}{Optional. Character. Main title for single plot.  Default is NULL, in which case a title is generated internally.}
+  	\item{main.outer}{Optional. Character. Main title for panel of six plots, to be shown in outer margin.  Default is NULL, in which case a title is generated internally.}
+	\item{x}{Optional \code{\link{legend}} argument. Default is "topleft".}
+	\item{return}{Optional. If TRUE return matrix that is plotted. Default is FALSE}
 }
 \section{Warning}{A warning is produced if dimension is not divisible by thin, so that one group is smaller than other groups.}
 \references{
@@ -41,7 +63,7 @@ Clayton, D. and Schifflers, E. (1987b) Models for temperoral variation in cancer
 
 Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2014) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. To appear in \emph{Journal of the Royal Statistical Society} A. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 27 Jun 2014}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 25 Apr 2015}
 \seealso{
 \code{\link{data.Japanese.breast.cancer}},
 \code{\link{data.Italian.bladder.cancer}} and

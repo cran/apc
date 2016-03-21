@@ -59,7 +59,7 @@ Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models.
 }
-\seealso{The \href{../doc/index.html}{vignette} \href{../doc/NewDesign.pdf}{NewDesign.pdf}.}
+\seealso{The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/NewDesign.pdf}{NewDesign.pdf}.}
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 1 Mar 2015}
 \examples{
 #####################

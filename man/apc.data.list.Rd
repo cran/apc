@@ -15,10 +15,15 @@ The \code{apc.data.list} gives sufficient information for the further analysis. 
 It has 2 obligatory arguments, which are a response matrix and a character indicating the data format.
 It also has some further optional arguments, which have certain default values. 
 Some times it may be convenient to add further arguments to the \code{apc.data.list}.  This will not affect the apc analysis.
+
+\code{apc.data.list} generates default row and column names for the response and dose matrices when these are not
+provided by the user.
 }
 \usage{apc.data.list(response, data.format, dose=NULL,
 					age1=1, per1=1, coh1=1, unit=1,
-					per.zero=NULL, per.max=NULL, time.adjust=0)}
+					per.zero=NULL, per.max=NULL,
+					time.adjust=0, label=NULL,
+					n.decimal=NULL)}
 \arguments{
 	\item{response}{matrix (or vector).  Numbers of responses.  It should have a format matching \code{data.format}}
 	\item{data.format}{character.  The following options are implemented:
@@ -36,10 +41,12 @@ Some times it may be convenient to add further arguments to the \code{apc.data.l
     \item{age1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "AP", "CA", "CL", "CL.vector.by.row", "PA", "trapezoid". If NULL default is 1.}
     \item{per1}{\emph{Optional}. Numeric or NULL.  Time label for oldest period group.  Used if \code{data.format} is "AP", "CP", "PA", "PC". If NULL default is 1.}
     \item{coh1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "CA", "CL", "CL.vector.by.row", "CP", "PC", "trapezoid". If NULL default is 1.}
-    \item{unit}{\emph{Optional}. Numeric or NULL.  Common time steps for age, period and cohort.  If NULL default is 1.}
+    \item{unit}{\emph{Optional}. Numeric or NULL.  Common time steps for age, period and cohort.  For quarterly data use \code{1/4}.  For monthly data use \code{1/12}. If NULL default is 1.}
 	\item{per.zero}{\emph{Optional}. Numeric or NULL.  Needed if data format is "trapezoid".}
 	\item{per.max}{\emph{Optional}. Numeric or NULL.  Needed if data format is "trapezoid".}
 	\item{time.adjust}{\emph{Optional}. Numeric.  Time labels are based on two of age1, per1 and coh1.  The third time label is computed according to the formula age1+coh1=per1+time.adjust.  Default is 0.  If age1=coh=1 it is natural to choose time.adjust=1.}
+	\item{label}{\emph{Optional}. Character.  Particularly useful when working with multiple data sets.}
+	\item{n.decimal}{\emph{Optional}.  Numeric or NULL.  The labels for parameters involves a date. This is found by converting a number into a character.  If the value is set to \code{d} package uses \code{\link{sprintf}}. If the value is set to \code{NULL} and \code{unit==1/4} for quarterly data or \code{unit==1/12} for monthly data or \code{1/20<=unit && unit<1} then package uses \code{sprintf}. If the value is set to \code{NULL}	and \code{1/20>unit || unit>=1}	then package uses \code{\link{as.character}}, which looks nice for integers, but can be messy otherwise.}
 }
 \value{
 	  	\item{response}{matrix (or vector).  Numbers of responses.}
@@ -52,8 +59,10 @@ Some times it may be convenient to add further arguments to the \code{apc.data.l
 		\item{per.zero}{Numeric.  If data.format is not "trapezoid" the value is NULL. If data.format is "trapezoid" the default is \code{per.zero=0}.}
 		\item{per.max}{Numeric.  If data.format is not "trapezoid" the value is NULL. If data.format is "trapezoid" the default is \code{per.max=nrow(response)+ncol(response)-1-per.zero}.}
 		\item{time.adjust}{Numeric.  Default of 0.}
+		\item{label}{Character. Default of NULL.}
+		\item{n.decimal}{Numeric or NULL.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 Mar 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 1 Feb 2016}
 \seealso{The below example shows how the \code{\link{data.Japanese.breast.cancer}} data.list was generated.
 Other provided data sets include
 \code{\link{data.asbestos}}
@@ -81,7 +90,6 @@ data.list	<- apc.data.list(response=vector.2.triangle(v.response,k),
 							data.format="CL.vector.by.row",age1=2001)
 data.list
 
-
 ###############
 #	Japanese breast cancer
 #	This is the code used to generate the data.Japanese.breast.cancer
@@ -107,19 +115,32 @@ v.cases		<- c(   88,   78,  101,  127,  179,
 				   678,  738,  878, 1140, 1683,
 				   640,  628,  656,  900, 1162,
 				   497,  463,  536,  644,  865)				 
-row.names	<- c("25-29","30-34","35-39","40-44","45-49",
-				 "50-54","55-59","60-64","65-69","70-74","75-79")
-col.names	<- c("1955-1959","1960-1964","1965-1969","1970-1974","1975-1979")
+#	see also example below for generating labels
 
-rates	<- matrix(data=v.rates,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
-cases	<- matrix(data=v.cases,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
+rates	<- matrix(data=v.rates,nrow=11, ncol=5,byrow=TRUE)
+cases	<- matrix(data=v.cases,nrow=11, ncol=5,byrow=TRUE)
 
 # 	A data list is now constructed as follows
 #	note that list entry rates is redundant,
 #	but included since it represents original data
 
-data.Japanese.breast.cancer	<- list(rates=rates,response=cases,
+data.Japanese.breast.cancer	<- apc.data.list(response=cases,
 			dose=cases/rates,data.format="AP",
 			age1=25,per1=1955,coh1=NULL,unit=5,
-			per.zero=NULL,per.max=NULL,time.adjust=0)
+			per.zero=NULL,per.max=NULL,time.adjust=0,
+			label="Japanese breast cancer")
+
+#	or when exploiting the default values
+
+data.Japanese.breast.cancer	<- apc.data.list(response=cases,
+			dose=cases/rates,data.format="AP",
+			age1=25,per1=1955,unit=5,
+			label="Japanese breast cancer")
+
+###################################################
+# 	Code for generating labels
+
+row.names <- paste(as.character(seq(25,75,by=5)),"-",as.character(seq(29,79,by=5)),sep="")
+col.names <- paste(as.character(seq(1955,1975,by=5)),"-",as.character(seq(1959,1979,by=5)),sep="")
+
 }

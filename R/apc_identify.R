@@ -25,6 +25,8 @@
 #	apc.identify
 #########################################################
 apc.identify	<- function(apc.fit.model)
+#	BN  2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
+#					using apc.internal.function.date.2.character
 #	3 Mar 2015
 #	In:		apc.fit.model			list		from apc.fit.model
 #	Out:	index.age.max	 		vector. 	Indices for identified age parameters 
@@ -65,6 +67,7 @@ apc.identify	<- function(apc.fit.model)
 	per.max			<- apc.fit.model$per.max
 	coh.max			<- apc.fit.model$coh.max
 	model.design	<- apc.fit.model$model.design
+	n.decimal		<- apc.fit.model$n.decimal
 	##############################
 	#	derived values
 	det.max	<- 1+sum(slopes)
@@ -239,16 +242,16 @@ apc.identify	<- function(apc.fit.model)
 						names.detrend	<- c(names.detrend,"cohort slope")	}		
 	if(difdif[1])
 		for(i in 1:age.max)
-		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_age_"   ,as.character((dates.max[index.age.max,1])[i]),sep=""))
-			names.detrend	<- c(names.detrend,paste("SS_DD_age_"   ,as.character((dates.max[index.age.max,1])[i]),sep=""))	}
+		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_age_"   ,apc.internal.function.date.2.character((dates.max[index.age.max,1])[i],n.decimal),sep=""))
+			names.detrend	<- c(names.detrend,paste("SS_DD_age_"   ,apc.internal.function.date.2.character((dates.max[index.age.max,1])[i],n.decimal),sep=""))	}
 	if(difdif[2])															      
 		for(i in 1:per.max)															      
-		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_period_",as.character((dates.max[index.per.max,1])[i]),sep=""))
-			names.detrend	<- c(names.detrend,paste("SS_DD_period_",as.character((dates.max[index.per.max,1])[i]),sep=""))	}		
+		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_period_",apc.internal.function.date.2.character((dates.max[index.per.max,1])[i],n.decimal),sep=""))
+			names.detrend	<- c(names.detrend,paste("SS_DD_period_",apc.internal.function.date.2.character((dates.max[index.per.max,1])[i],n.decimal),sep=""))	}		
 	if(difdif[3])																	      
 		for(i in 1:coh.max)															      
-		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_cohort_",as.character((dates.max[index.coh.max,1])[i]),sep=""))
-			names.detrend	<- c(names.detrend,paste("SS_DD_cohort_",as.character((dates.max[index.coh.max,1])[i]),sep="")) }
+		{	names.ssdd		<- c(names.ssdd	  ,paste("SS_DD_cohort_",apc.internal.function.date.2.character((dates.max[index.coh.max,1])[i],n.decimal),sep=""))
+			names.detrend	<- c(names.detrend,paste("SS_DD_cohort_",apc.internal.function.date.2.character((dates.max[index.coh.max,1])[i],n.decimal),sep="")) }
 	rownames(coefficients.ssdd	 )	<- names.ssdd		
 	rownames(coefficients.detrend)	<- names.detrend
 	##############################
@@ -348,19 +351,19 @@ apc.identify	<- function(apc.fit.model)
 		names.dif		<- c("level")
 		if(difdif[1])
 			for(i in 1:age.max)
-			{	names.demean	<- c(names.demean ,paste(  "S_D_age_"   ,as.character((dates.sub[index.age.sub,1])[i]),sep=""))
+			{	names.demean	<- c(names.demean ,paste(  "S_D_age_"   ,apc.internal.function.date.2.character((dates.sub[index.age.sub,1])[i],n.decimal),sep=""))
 				if(i>1)
-				names.dif		<- c(names.dif	  ,paste(    "D_age_"   ,as.character((dates.sub[index.age.sub,1])[i]),sep=""))	}
+				names.dif		<- c(names.dif	  ,paste(    "D_age_"   ,apc.internal.function.date.2.character((dates.sub[index.age.sub,1])[i],n.decimal),sep=""))	}
 		if(difdif[2])															      
 			for(i in 1:per.max)															      
-			{	names.demean	<- c(names.demean ,paste(  "S_D_period_",as.character((dates.sub[index.per.sub,1])[i]),sep=""))
+			{	names.demean	<- c(names.demean ,paste(  "S_D_period_",apc.internal.function.date.2.character((dates.sub[index.per.sub,1])[i],n.decimal),sep=""))
 				if(i>1)
-				names.dif		<- c(names.dif	  ,paste(    "D_period_",as.character((dates.sub[index.per.sub,1])[i]),sep=""))	}		
+				names.dif		<- c(names.dif	  ,paste(    "D_period_",apc.internal.function.date.2.character((dates.sub[index.per.sub,1])[i],n.decimal),sep=""))	}		
 		if(difdif[3])																	      
 			for(i in 1:coh.max)															      
-			{	names.demean	<- c(names.demean ,paste(  "S_D_cohort_",as.character((dates.sub[index.coh.sub,1])[i]),sep=""))
+			{	names.demean	<- c(names.demean ,paste(  "S_D_cohort_",apc.internal.function.date.2.character((dates.sub[index.coh.sub,1])[i],n.decimal),sep=""))
 				if(i>1)
-				names.dif		<- c(names.dif	  ,paste(    "D_cohort_",as.character((dates.sub[index.coh.sub,1])[i]),sep=""))	}
+				names.dif		<- c(names.dif	  ,paste(    "D_cohort_",apc.internal.function.date.2.character((dates.sub[index.coh.sub,1])[i],n.decimal),sep=""))	}
 		rownames(coefficients.demean )	<- names.demean	
 		rownames(coefficients.dif	 )	<- names.dif	
 		##############################

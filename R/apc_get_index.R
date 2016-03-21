@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 31 Mar 2015, version 1.0.3
+#	Bent Nielsen, 4 Jan 2016, version 1.2
 #	function to get indices of data and to generate sub sets of data
 #######################################################
-#	Copyright 2014, 2015 Bent Nielsen
+#	Copyright 2014-2016 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -22,6 +22,8 @@
 #######################################################
 
 apc.get.index	<- function(apc.data.list)
+#	BN 4 Jan 2016:  check values added.
+#					change coh1 for "AP" and "PA"	
 #	BN 6 Feb 2015
 #	function to get indices to keep track of estimation and labelling
 #	in:		apc.data.list
@@ -39,6 +41,10 @@ apc.get.index	<- function(apc.data.list)
 	per.zero	<- apc.data.list$per.zero	
 	per.max		<- apc.data.list$per.max
 	time.adjust	<- apc.data.list$time.adjust
+	n.decimal	<- apc.data.list$n.decimal
+	#########################
+	#	check values - 3 Jan 2016
+	if(is.null(time.adjust))	time.adjust <- 0
 	#########################
 	#	data.format SPECIFIC CODE
 	#########################
@@ -82,7 +88,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- age.max-1
 		age1		<- age1
 		per1		<- per1
-		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust
+		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust+1		# 4 Jan 2016: add 1
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		col	<- 0
@@ -162,51 +168,11 @@ apc.get.index	<- function(apc.data.list)
 			index.trap[(col+1):(col+k+1-row),2]	<- row		  							#	cohort 
 			col	<- col +k+1-row
 		}
-		data.xlab	<- "policy time (cohort)"
+		data.xlab	<- "underwriting time (cohort)"
 		data.ylab	<- "development time (age)"
 		data.x1	<- coh1
 		data.y1	<- age1
 	}
-#	#########################
-#	if(data.format=="CL.vector.by.row")
-#	#	square matrix with cohort/age as increasing row/column index
-#	#	NA: in botton right triangle so period >= age.max+period.max
-#	{	##############################
-#		#	check obligatory input
-#		if(is.vector(response)==FALSE)	return(cat("apc.error: Response is not a vector \n"))
-#		##############################
-#		#	get dimension
-#		k			<- as.integer((sqrt(1+8*length(response))-1)/2)
-#		##############################
-#		#	turn into matrix
-#		response	<- t(as.matrix(response))
-#		##############################
-#		n.data		<- k*(k+1)/2
-#		nrow		<- k
-#		ncol		<- k
-#		age.max		<- k
-#		coh.max		<- k
-#		per.max		<- k
-#		per.zero	<- 0
-#		age1		<- age1
-#		coh1		<- coh1
-#		per1		<- age1+coh1-time.adjust
-#		index.data	<- matrix(nrow=n.data,ncol=2)
-#		index.data[,1]	<- 1
-#		index.data[,2]	<- seq(1,n.data)
-#		index.trap	<- matrix(nrow=n.data,ncol=2)
-#		col	<- 0
-#		for(row in 1:nrow)
-#		{
-#			index.trap[(col+1):(col+k+1-row),1]	<- seq(1,k+1-row)						#	age    
-#			index.trap[(col+1):(col+k+1-row),2]	<- row		  							#	cohort 
-#			col	<- col +k+1-row
-#		}
-#		data.xlab	<- ""
-#		data.ylab	<- "vec(policy/development triangle)"
-#		data.x1	<- NA
-#		data.y1	<- NA
-#	}
 	#########################
 	if(data.format=="CP")
 	#	matrix with cohort/period as increasing row/column index
@@ -250,7 +216,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- age.max-1
 		age1		<- age1
 		per1		<- per1
-		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust
+		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust+1		# 4 Jan 2016: add 1
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		row	<- 0
@@ -356,21 +322,38 @@ apc.get.index	<- function(apc.data.list)
 				U			=U			,
 				age1		=age1		,
 				per1		=per1		,
-				coh1		=coh1	 	))
+				coh1		=coh1	 	,
+				n.decimal	=n.decimal	))
 }	#	apc.get.index
 
 ####################################################
 apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 											   per.cut.lower=0,per.cut.upper=0,
-											   coh.cut.lower=0,coh.cut.upper=0,apc.index=NULL)										   
+											   coh.cut.lower=0,coh.cut.upper=0,
+											   apc.index=NULL,suppress.warning=FALSE)
+#	BN  29 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
+#					using apc.internal.function.date.2.character
+#	BN 7 jan 2016: warning modified	& add dim.names
+#	BN 14 may 2015: warning added
 #	BN 9 dec 2013
 #	function to get subset of data set
 #	in:		apc.data.list
 #	out:	list 
+#	note:	if apc.index supplied then it suffices to input
+#			apc.data.list = list(response=response,data.format=data.format,dose=dose)
+#				where dose could be NULL
+#			apc.index does not need to be a full apc.index list. Sufficient entries are
+#						age.max
+#						per.max
+#						coh.max
+#						index.trap
+#						index.data
+#						per.zero
 {	#	apc.data.list.subset
 	##############################
 	#	input
 	cut.old	<- c(age.cut.lower,age.cut.upper,per.cut.lower,per.cut.upper,coh.cut.lower,coh.cut.upper)
+	warning <- TRUE
 	######################
 	#	get index
 	if(is.null(apc.index)==TRUE)
@@ -388,13 +371,15 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 	index.data	<- apc.index$index.data
 	index.trap	<- apc.index$index.trap
 	##############################
+	#	get data.list values, that are used
+	response	<- apc.data.list$response
+	dose		<- apc.data.list$dose
+	data.format	<- apc.data.list$data.format
+	##############################
 	#	check function
 	function.check	<- function()
 	{
 		check	<-1 
-		check	<- check*isTRUE(age.max>age.cut.lower+age.cut.upper+2)
-		check	<- check*isTRUE(per.max>per.cut.lower+per.cut.upper+2)
-		check	<- check*isTRUE(coh.max>coh.cut.lower+coh.cut.upper+2)	
 		check	<- check*isTRUE(age.cut.lower>per.zero+per.cut.lower-coh.max+coh.cut.upper)
 		check	<- check*isTRUE(coh.cut.lower>per.zero+per.cut.lower-age.max+age.cut.upper)
 		check	<- check*isTRUE(age.cut.upper>=age.max-per.zero-per.max+per.cut.upper+coh.cut.lower)
@@ -405,9 +390,6 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 	while(check<1)	
 		repeat
 		{
-			if(age.max<=age.cut.lower+age.cut.upper+2)	{ check <- 11; break }
-			if(per.max<=per.cut.lower+per.cut.upper+2)	{ check <- 12; break }
-			if(coh.max<=coh.cut.lower+coh.cut.upper+2)	{ check <- 13; break }
 			if(age.cut.lower<=per.zero+per.cut.lower-coh.max+coh.cut.upper)
 				{ age.cut.lower <- age.cut.lower+1; check	<- function.check(); break}
 			if(coh.cut.lower<=per.zero+per.cut.lower-age.max+age.cut.upper)
@@ -418,35 +400,39 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 				{ coh.cut.upper <- coh.cut.upper+1; check	<- function.check(); break}
 		}
 	cut.new	<- c(age.cut.lower,age.cut.upper,per.cut.lower,per.cut.upper,coh.cut.lower,coh.cut.upper)
-	if(check > 1)
-	{	print("apc.data.list.subset ERROR:")
-		print("cuts in argument are:") 
-		print(cut.old)                 
-		print("have been modified to:")
-		print(cut.new)                 	
-		if(check==11) return(cat("age.max<=age.cut.lower+age.cut.upper+2 \n"))
-		if(check==12) return(cat("per.max<=per.cut.lower+per.cut.upper+2 \n"))
-		if(check==13) return(cat("coh.max<=coh.cut.lower+coh.cut.upper+2 \n"))		
-	}
-	if(sum(cut.old) != sum(cut.new))
-	{	print("apc.data.list.subset WARNING:")
-		print("cuts in argument are:")
+	if(sum(cut.old) != sum(cut.new) && warning && suppress.warning==FALSE)
+	{	cat("WARNING apc.data.list.subset:")
+		cat("cuts in argument are:\n")
 		print(cut.old)
-		print("have been modified to:")
-		print(cut.new)
-		
+		cat("have been modified to:\n")
+		print(cut.new)		
 	}
-
-	##############################
-	#	get data.list values, that are used
-	response	<- apc.data.list$response
-	dose		<- apc.data.list$dose
+	if(age.max<=age.cut.lower+age.cut.upper+2)	check <- 11
+	if(per.max<=per.cut.lower+per.cut.upper+2)	check <- 12
+	if(coh.max<=coh.cut.lower+coh.cut.upper+2)	check <- 13
+	if(age.max<=age.cut.lower+age.cut.upper  )	check <- 21
+	if(per.max<=per.cut.lower+per.cut.upper  )	check <- 22
+	if(coh.max<=coh.cut.lower+coh.cut.upper  )	check <- 23
+	if(check > 20)
+	{	cat("ERROR apc.data.list.subset:\n")
+		if(check==21) cat("age.max<=age.cut.lower+age.cut.upper ... data set empty \n")
+		if(check==22) cat("per.max<=per.cut.lower+per.cut.upper ... data set empty \n")
+		if(check==23) cat("coh.max<=coh.cut.lower+coh.cut.upper ... data set empty \n")
+		return()
+	}
+	if(check > 1 && suppress.warning==FALSE)
+	{	cat("WARNING apc.data.list.subset:\n")
+		if(check==11) cat("age.max<=age.cut.lower+age.cut.upper+2 \n")
+		if(check==12) cat("per.max<=per.cut.lower+per.cut.upper+2 \n")
+		if(check==13) cat("coh.max<=coh.cut.lower+coh.cut.upper+2 \n")
+	}
 	##############################
 	#	get new indices
-	per.zero.new	<- per.zero+per.cut.lower-age.cut.lower-coh.cut.lower
+	per.zero.adjust <- per.zero+per.cut.lower-age.cut.lower-coh.cut.lower
+	per.zero.new	<- max(per.zero.adjust,0)
 	age.max.new		<- age.max-age.cut.upper-age.cut.lower
 	coh.max.new		<- coh.max-coh.cut.upper-coh.cut.lower
-	per.max.new		<- per.max-per.cut.upper-per.cut.lower
+	per.max.new		<- per.max-per.cut.upper-per.cut.lower+min(per.zero.adjust,0)
 	age1.new		<- age1	+ age.cut.lower*unit
 	coh1.new		<- coh1	+ coh.cut.lower*unit
 	per1.new		<- per1 + (per.zero.new+age.cut.lower+coh.cut.lower-per.zero)*unit
@@ -469,6 +455,24 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 				if(age.new+coh.new>per.zero.new+1 && age.new+coh.new<per.zero.new+per.max.new+2)
 					trap.dose.new[age.new,coh.new]	<- trap.dose[age.new+age.cut.lower,coh.new+coh.cut.lower]
 	}				
+	##############################
+	#	row & col names
+	if(age.max.new>1 && coh.max.new>1)
+	{	row.names	<- c(paste("age_",apc.internal.function.date.2.character(age1.new+seq(0,age.max.new-1)*unit),sep=""))
+		col.names	<- c(paste("coh_",apc.internal.function.date.2.character(coh1.new+seq(0,coh.max.new-1)*unit),sep=""))
+		rownames(trap.response.new) <- row.names
+		colnames(trap.response.new) <- col.names
+		if(is.null(dose)==FALSE)
+		{	rownames(trap.dose.new) 	<- row.names		
+			colnames(trap.dose.new) 	<- col.names
+		}	
+	}	
+	##############################
+	#	warning if coordinate system changed
+	data.format.list.warning	<- c("AP","CA","CL","CP","PA","PC")	# 5 Jan 2016: deleted "trap","trapezoid"
+	if(data.format %in% data.format.list.warning && warning && suppress.warning==FALSE)
+		cat("WARNING apc.data.list.subset: coordinates changed to AC\n")
+	##############################
 	return(list(response	=trap.response.new	,
 				dose		=trap.dose.new		,
 				data.format	="trapezoid"		,	

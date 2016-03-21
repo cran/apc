@@ -1,9 +1,46 @@
 Package: apc
-Version: 1.1
-Date: 2015-04-12
+Version: 1.2
+Date: 2016-03-19
 
+CHANGES in version 1.2
+New functions
+	apc.forecast.ac			distribution forecasts for
+							model.family="poisson.response"
+							model.design="AC"
+Improvements
+	apc.data.list.subset	Generates row and column names for trapezoid data matrix
+							Warning adjusted							
+Bugs
+	apc.get.index			default for time.adjust fixed
+							calculation of coh1 adjusted for "AP" and "PA" 
+
+--------------------------------------------------	
+CHANGES in version 1.1.2
+Bugs
+	data.loss.VNJ			counts fixed
+
+--------------------------------------------------	
+CHANGES in version 1.1.1
+New functions
+	apc.plot.data.level		level plot of data
+	apc.plot.data.within	now plotting only one combination 
+	apc.plot.data.within.all.six
+	apc.plot.fit.residuals	level plot of residuals
+	apc.plot.fit.linear.predictors	level plot of linear predictors
+	apc.plot.fit.fitted.values		level plot of fitted.values
+	apc.plot.fit.all
+Documentation
+	apc.data.list.Rd		Example of generating labels of data matrix
+							To do: Discuss what the labels of the data matrix do
+							Perhaps make labels of data matrix automatic?
+Improvements
+	apc.data.list			Generates row and column names for data matrices
+							when none have been provided.
+Bugs
+	apc.plot.data.within	Legend fixed
+
+--------------------------------------------------	
 CHANGES in version 1.1
-
 New functions
 	vector.2.triangle:		For input of reserving triangles recorded in vector form
 							Data format "CL.as.vector" then dropped
@@ -25,7 +62,3 @@ Bugs
 	apc.identify			Constant for type "detrend" corrected
 	apc.data.list			Input check for data.format "CL" and "CL.as.vector" corrected
 	
-	
-TO DO
-apc.plot.fit.pt
-	check plots for normal distributions. 

@@ -29,6 +29,7 @@ For this one can with advantage use the \code{DCL.package}.
 	\item{per.zero}{NULL.  Not needed when data.format="CL"} 
 	\item{per.max}{NULL.  Not needed when data.format="CL"} 
 	\item{time.adjust}{0.  Thus age=1 in cohort=1 corresponds to period=1+1-1+0=1.}	
+	\item{label}{character. "loss TA".}						
 }
 \source{Tables 1 of Verrall (1991).}
 \references{                                                                         
@@ -44,7 +45,7 @@ Verrall, R.J. (1991)
 On the estimation of reserves from loglinear models                      
 Insurance: Mathematics and Economics 10, 75-80                           
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 Mar 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 8 Sep 2015 (18 Mar 2015)}
 \seealso{General description of \code{\link{apc.data.list}} format.}
 \examples{
 #########################

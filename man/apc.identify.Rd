@@ -11,7 +11,7 @@ These are used either indirectly by \code{\link{apc.plot.fit}}
 or they are computed directly with this command.
 
 The ad hoc identifications are based on	Nielsen (2014b). For details see also
-the \href{../doc/index.html}{vignette} \href{../doc/Identification.pdf}{Identification.pdf}
+the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}
 or in the notes below.
 
 For model designs of any type two ad hoc identified time effects.
@@ -105,7 +105,7 @@ Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 12 Apr 2015}
-\seealso{The \href{../doc/index.html}{vignette} \href{../doc/Identification.pdf}{Identification.pdf}.}
+\seealso{The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}.}
 \examples{
 ########################
 #	Belgian lung cancer

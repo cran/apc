@@ -34,22 +34,21 @@ For this one can with advantage use the \code{DCL.package}.
 	\item{per.zero}{NULL.  Not needed when data.format="CL"} 
 	\item{per.max}{NULL.  Not needed when data.format="CL"} 
 	\item{time.adjust}{0.  Thus age=1 in cohort=1 corresponds to period=1+1-1+0=1.}	
+	\item{label}{character. "loss VNJ".}						
 }
 \source{Tables 1,2 of Verrall, Nielsen and Jessen (2010).}
 \references{
 Verrall R, Nielsen JP, Jessen AH (2010)
 Prediction of RBNS and IBNR claims using claim amounts and claim counts
-ASTIN Bulletin 40, 871-887
+\emph{ASTIN Bulletin} 40, 871-887
 
-Martinez Miranda MD, Nielsen B, Nielsen JP and Verrall R (2011)
-Cash flow simulation for a model of outstanding liabilities based on claim amounts and claim numbers
-ASTIN Bulletin 41, 107-129
+Martinez Miranda, M.D., Nielsen, B., Nielsen, J.P. and Verrall, R. (2011) Cash flow simulation for a model of outstanding liabilities based on claim amounts and claim numbers. \emph{ASTIN Bulletin} 41, 107-129
 
-Kuang D, Nielsen B, Nielsen JP (2015)
+Kuang D, Nielsen B, Nielsen JP (2015) 
 The geometric chain-ladder
-Scandinavian Acturial Journal, to appear
+\emph{Scandinavian Acturial Journal} 2015, 278-300.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 Mar 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 Mar 2015 updated 4 Jan 2016}
 \seealso{General description of \code{\link{apc.data.list}} format.}
 \examples{
 #########################

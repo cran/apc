@@ -11,7 +11,8 @@ with data.format "trapezoid" without reducing dataset.
 							age.cut.lower=0,age.cut.upper=0,
 							per.cut.lower=0,per.cut.upper=0,
 							coh.cut.lower=0,coh.cut.upper=0,
-							apc.index=NULL)}
+							apc.index=NULL,
+							suppress.warning=FALSE)}
 \arguments{
   	\item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
 	\item{age.cut.lower}{\emph{Optional}. Numeric. Specifies how many age    groups to cut at lower end. Default is zero.}
@@ -21,6 +22,25 @@ with data.format "trapezoid" without reducing dataset.
 	\item{per.cut.upper}{\emph{Optional}. Numeric. Specifies how many period groups to cut at upper end. Default is zero.}
 	\item{coh.cut.upper}{\emph{Optional}. Numeric. Specifies how many cohort groups to cut at upper end. Default is zero.}
 	\item{apc.index}{\emph{Optional}. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed internally.}
+	\item{suppress.warning}{\emph{Optional}. Logical. Suppresses warnings. This is useful when generating data sums using
+							\code{\link{apc.data.sums}} but reducing the data set so much that models cannot be fitted.}
+}
+\section{Arguments: Notes}{
+If apc.index is supplied then the input can be simplified.
+It suffices to write
+\code{apc.data.list = list(response=response,data.format=data.format,dose=dose)},
+where dose could be \code{dose=NULL}.
+Likewise \code{apc.index} does not need to be a full \code{apc.index list}. It suffices to construct a list with entries
+\code{age.max},                                                         
+\code{per.max},                                                         
+\code{coh.max},
+\code{age1},
+\code{per1},
+\code{coh1},
+\code{unit},
+\code{per.zero},                                                        
+\code{index.trap},                                                      
+\code{index.data}.                                                      
 }
 \value{
 	  	\item{response}{matrix (or vector).  Numbers of responses.}
@@ -33,7 +53,7 @@ with data.format "trapezoid" without reducing dataset.
 		\item{per.zero}{Numeric.}
 		\item{per.max}{Numeric.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 4 Dec 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 4 Dec 2013 updated 6 Mar 2016}
 \seealso{The below example uses artificial data.  For an example using
 \code{\link{data.asbestos}}
 see 

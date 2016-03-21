@@ -1,6 +1,6 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 3 Apr 2015, version 1.0.3
+#	Bent Nielsen, 26 Apr 2015, version 1.1.1
 #	function to plot fit
 #######################################################
 #	Copyright 2014, 2015 Bent Nielsen
@@ -376,8 +376,8 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 ##################################################
 
 apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,24,25),col=c("black","green","blue","red"),bg=NULL,cex=NULL,main=NULL)
-#	BN 7 feb 2015
-#	in		apc.fit.model		output from apc.fit.model
+#	BN 26 Apr 2015
+#	in	apc.fit.model		output from apc.fit.model
 {	#	apc.plot.fit.pt
 	####################
 	#	get values
@@ -403,7 +403,7 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 	if(isTRUE(model.family %in% c("poisson.response","poisson.dose.response")))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- ppois(v.response[row],v.fitted.values[row])
-	if(isTRUE(model.family=="gaussian.response"))
+	if(isTRUE(model.family %in% c("gaussian.response","gaussian.rates")))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- pnorm(v.response[row],v.fitted.values[row],sqrt(sigma2))
 	if(isTRUE(model.family=="binomial.dose.response"))
@@ -457,3 +457,46 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 	#	return value
 	if(do.value)	return(pt.fit)
 }	#	apc.plot.fit.pt
+
+apc.plot.fit.residuals	<- function(apc.fit.model,rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE,return=FALSE)
+#	BN 26 Apr 2015
+#	residuals coming from glm.fit.
+{	#	apc.plot.fit.residuals
+	m	<- apc.fit.model$response
+	m[apc.fit.model$index.data] <- apc.fit.model$residual
+	apc.plot.data.level(c(apc.fit.model,list(m.residual=m)),data.type="residual",rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE)
+	if(return) return(m)
+}	#	apc.plot.fit.residuals
+
+apc.plot.fit.fitted.values	<- function(apc.fit.model,rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE,return=FALSE)
+#	BN 26 Apr 2015
+#	residuals coming from glm.fit.
+{	#	apc.plot.fit.residuals
+	m	<- apc.fit.model$response
+	m[apc.fit.model$index.data] <- apc.fit.model$fitted.values
+	apc.plot.data.level(c(apc.fit.model,list(m.fitted.values=m)),data.type="fitted.values",rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE)
+	if(return) return(m)
+}	#	apc.plot.fit.residuals
+
+apc.plot.fit.linear.predictors	<- function(apc.fit.model,rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE,return=FALSE)
+#	BN 26 Apr 2015
+#	residuals coming from glm.fit.
+{	#	apc.plot.fit.residuals
+	m	<- apc.fit.model$response
+	m[apc.fit.model$index.data] <- apc.fit.model$linear.predictors
+	apc.plot.data.level(c(apc.fit.model,list(m.linear.predictors=m)),data.type="linear.predictors",rotate=FALSE,main=NULL,lab=NULL,contour=FALSE,colorkey=TRUE)
+	if(return) return(m)
+}	#	apc.plot.fit.residuals
+
+apc.plot.fit.all	<- function(apc.fit.model,log="",rotate=FALSE)
+#	BN 26 Apr 2015
+{	#	apc.plot.fit.all
+					apc.plot.fit(apc.fit.model)
+		dev.new();	apc.plot.fit.pt(apc.fit.model)
+		dev.new();	apc.plot.fit.residuals(apc.fit.model)
+		dev.new();	apc.plot.fit.fitted.values(apc.fit.model)
+		dev.new();	apc.plot.fit.linear.predictors(apc.fit.model)
+		dev.new();	apc.plot.data.level(apc.fit.model,"r")
+	if(is.null(apc.fit.model$dose)==FALSE)
+	{	dev.new();	apc.plot.data.level(apc.fit.model,"m")	}
+}	#	apc.plot.fit.all

@@ -4,13 +4,15 @@
 \description{Plots data sums using \code{\link{apc.plot.data.sums}}.
 			 Sparsity plots of data using \code{\link{apc.plot.data.sparsity}}.
 			 Plots data using all combinations of two time scales using \code{\link{apc.plot.data.within}}.
+			 Level plots of data using \code{\link{apc.plot.data.level}}.
 			 The latter plot is done for responses and if applicable also for doses and mortality rates.}
-\usage{apc.plot.data.all(apc.data.list,log ="y")}
+\usage{apc.plot.data.all(apc.data.list,log ="y",rotate=FALSE)}
 \arguments{
   \item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
   \item{log}{Optional \code{\link{plot}} argument. Character. "y" if y-scale is logarithmic, otherwise "". Default is "y".}
+  \item{rotate}{Optional. Logical. If TRUE rotates \code{\link{apc.plot.data.level}} 90 degrees clockwise (or anti-clockwise if data.format is "CL"). Default is FALSE.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 27 Nov 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 25 Apr 2015}
 \section{Warning}{A warning is produced if dimension is not divisible by thin, so that one group is smaller than other groups.}
 \seealso{The example below uses Italian bladder cancer data, see \code{\link{data.Italian.bladder.cancer}}}
 \examples{

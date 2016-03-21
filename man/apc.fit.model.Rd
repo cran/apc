@@ -110,6 +110,9 @@ apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
 \note{
 For gaussian families \emph{deviance} is defined differently in \code{apc} and \code{\link{glm}}.
 Here it is -2 log likelihood.  In \code{\link{glm}} it is RSS.
+
+The values for \code{apc.fit.model} include the \code{\link{apc.data.list}} and the \code{apc.index} returned by
+\code{\link{apc.get.index}}.
 }
 \references{
 Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.

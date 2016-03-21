@@ -22,7 +22,8 @@ The data set is in "AP"-format.
 	\item{per.max}{NULL.  Not needed when data.format="AP"}
 	\item{time.adjust}{0.  Thus age=25 in period=1955 corresponds to cohort=1955-25+0=1930, and indeed the
 							centers of the age and period groups, that is age=27 and period=1957
-							translate into cohort=1957-27+0=1930.}	
+							translate into cohort=1957-27+0=1930.}
+	\item{label}{character. "Italian bladder cancer".}													
 }
 \source{Table IV of Clayton and Schifflers (1987a).}
 \references{
@@ -30,7 +31,7 @@ Clayton, D. and Schifflers, E. (1987a)
 Models for temperoral variation in cancer rates. I: age-period and age-cohort models. 
 \emph{Statistics in Medicine} 6, 449-467.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 24 Oct 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 8 Sep 2015 (24 Oct 2013)}
 \seealso{General description of \code{\link{apc.data.list}} format.}
 \examples{
 #########################

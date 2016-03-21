@@ -8,12 +8,24 @@
   \item{data.type}{Optional. Character. "r","d","m" if sums are computed for responses,dose,(mortality) rates.  Rates are computed as responses/doses. "r" is default.} 
   \item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
 }
+\section{Arguments: Notes}{
+If apc.index is supplied then the input can be simplified.
+For instance if \code{data.type="r"} then, for the first argument, it suffices to write
+\code{apc.data.list = list(response=response)}.
+Likewise \code{apc.index} does not need to be a full \code{apc.index list}. It suffices to construct a list with entries
+\code{age.max},                                                         
+\code{per.max},                                                         
+\code{coh.max},                                                         
+\code{index.trap},                                                      
+\code{index.data},                                                      
+\code{per.zero}.                                                        
+}
 \value{
   \item{sums.age}{Vector. Sums over data.matrix by age.}
   \item{sums.per}{Vector. Sums over data.matrix by period.}
   \item{sums.coh}{Vector. Sums over data.matrix by cohort.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Dec 2013}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Dec 2013 updated 4 Jan 2016}
 \seealso{The example below uses Japanese breast cancer data, see \code{\link{data.Japanese.breast.cancer}}}
 \examples{
 #####################

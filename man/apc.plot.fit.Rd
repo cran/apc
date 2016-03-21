@@ -120,7 +120,7 @@ and
 
 Values of coefficients can be found using \code{\link{apc.identify}}.
 
-The \href{../doc/index.html}{vignette} \href{../doc/Identification.pdf}{Identification.pdf}
+The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}
 has information on the identification.
 }
 \examples{

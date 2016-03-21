@@ -12,21 +12,21 @@ The outline of an analysis is described below.
 	\tabular{ll}{
 		Package: \tab apc\cr
 		Type: \tab Package\cr
-		Version: \tab 1.1\cr
-		Date: \tab 2015-04-12\cr
+		Version: \tab 1.2\cr
+		Date: \tab 2016-03-19\cr
 		License: \tab GPL-3\cr
 	}
 	The apc package uses the canonical parameters suggested by
 	Kuang, Nielsen and Nielsen (2008)
 	and generalized by
-	Nielsen (2014b). 
+	Nielsen (2014). 
 	These evolve around the second differences of age, period and cohort factors as well as an three parameters (level and two slopes)
 	for a linear plane.  The age, period and cohort factors themselves are not identifiable.  They could be ad hoc identified
 	by associating the levels and two slopes to the age, period and cohort factors in a particular way.  This should be done
 	with great care as such ad hoc identification easily masks which information is coming from the data and which information
 	is coming from the choice of ad hoc identification scheme. An illustration is given below.
 	A short description of the package can be found in
-	Nielsen (2014a).
+	Nielsen (2015).
 
 	A formal analysis of the identification of the age-period-cohort model can be found in
 	Nielsen and Nielsen (2014).
@@ -71,6 +71,14 @@ The outline of an analysis is described below.
 			Recursive analysis can be done by selecting a subset of the observations through
 			\code{\link{apc.data.list.subset}} and then repeating analysis.  This will reveal how sensitive
 			the results are to particular age, period and cohort groups.
+		\item
+			Forecasting.  Some functions have been been added for forecasting in from a Poisson response-only model
+			with an age-cohort parametrization
+			\code{\link{apc.forecast.ac}}
+			and with an age-period parametrization
+			\code{\link{apc.forecast.ap}}.
+			See also the overview on
+			\code{\link{apc.forecast}}
 	}
 	Data examples include
 	\enumerate{
@@ -80,6 +88,7 @@ The outline of an analysis is described below.
 			This dataset has no measure for exposure.
 			It can be analysed using a Poisson model with an "APC" or an "AC" design.
 			Source: Martinez Miranda, Nielsen and Nielsen (2015).
+			Also used in Nielsen (2015).
 		\item	
 			\code{\link{data.Italian.bladder.cancer}}
 			includes counts of deaths from bladder cancer in the Italy.
@@ -100,7 +109,7 @@ The outline of an analysis is described below.
 			Source: Clayton and Schifflers (1987b).
 	}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 29 Jan 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 29 Jan 2015 updated 7 Mar 2016.}
 \references{
 Clayton, D. and Schifflers, E. (1987a) Models for temperoral variation in cancer rates. I: age-period and age-cohort models. \emph{Statistics in Medicine} 6, 449-467.
 
@@ -114,13 +123,16 @@ Kuang, D., Nielsen, B. and Nielsen, J.P. (2011) Forecasting in an extended chain
 
 Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
 
-Nielsen, B. (2014a) apc: A package for age-period-cohort analysis. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/nielsen_apc_package.pdf}{Nuffield DP}.
+Nielsen, B. (2015) apc: An R package for age-period-cohort analysis. \emph{R Journal} 7, 52-64. \emph{Download}: \href{https://journal.r-project.org/archive/2015-2/nielsen.pdf}{Open access}.
 
-Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
+Nielsen, B. (2014) Deviance analysis of age-period-cohort models. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
 
 Nielsen, B. and Nielsen, J.P. (2014) Identification and forecasting in mortality models. The Scientific World Journal. vol. 2014, Article ID 347043, 24 pages. \emph{Download}: \href{http://www.hindawi.com/journals/tswj/2014/347043}{Article}.
 }
 \seealso{
+Vignettes are given on this
+\href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{web page}.
+
 Age-period-cohort analysis can alternatively be done by the package
 \code{Epi}.
 }
@@ -179,16 +191,19 @@ apc.fit.table(data.list,"poisson.dose.response")
 #	the tests in the deviance table
 
 fit.apc	<- apc.fit.model(data.list,"poisson.dose.response","APC")
-fit.at	<- apc.fit.model(data.list,"poisson.dose.response","Ad")
+fit.ad	<- apc.fit.model(data.list,"poisson.dose.response","Ad")
 fit.a	<- apc.fit.model(data.list,"poisson.dose.response","A")
 
 #	Get coefficients for canonical parameters through
 
 fit.apc$coefficients.canonical
-fit.at$coefficients.canonical
+fit.ad$coefficients.canonical
 
 #######
-#	5. Plot probability transforms of responses given fit
+#	5. Residual analysis.
+#	Plot estimators, probability transforms of responses given fit,
+# 	residuals, fitted values, linear predictors, and data.
+#	In probability transform plot:
 #	Black circle are used for central part of distribution.
 #	Triangles are used in tails, green/blue/red as responses are further in tail
 #	No sign of mis-specification for "APC" and "Ad": there are many
@@ -197,12 +212,12 @@ fit.at$coefficients.canonical
 #	That model is not supported by the data.  
 #	To get numerical values see apc.plot.fit.pt
 
-apc.plot.fit.pt(fit.apc)
-apc.plot.fit.pt(fit.at)
-apc.plot.fit.pt(fit.a)
+apc.plot.fit.all(fit.apc)
+apc.plot.fit.all(fit.ad)
+apc.plot.fit.all(fit.a)
 
 #######
-#	6. Plot estimated coefficients 
+#	6. Plot estimated coefficients for sub models 
 #	Consider "APC" and "Ad"
 #	The first row of plots show double differences of paramters
 #	The second row of plots shows level and slope determining a linear plane
@@ -215,7 +230,9 @@ apc.plot.fit.pt(fit.a)
 
 apc.plot.fit(fit.apc)
 dev.new()
-apc.plot.fit(fit.at)
+apc.plot.fit(fit.ad)
+dev.new()
+apc.plot.fit(fit.a)
 
 #######
 #	7. Recursive analysis

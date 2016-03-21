@@ -154,6 +154,8 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 #	apc.fit.model
 #########################################################
 apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL)
+#	BN  2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
+#					using apc.internal.function.date.2.character
 #	BN 17 mar 2015
 #	Function to estimate apc sub-model
 #	uses canonical parametrisation as in Nielsen (2013)
@@ -228,7 +230,7 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	per.max		<- apc.index$per.max				
 	coh.max		<- apc.index$coh.max
 	age1		<- apc.index$age1    
-	per1		<- apc.index$per1    
+	per1		<- apc.index$per1
 	coh1		<- apc.index$coh1    
 	unit		<- apc.index$unit
 	per.zero	<- apc.index$per.zero
@@ -236,6 +238,7 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	n.data		<- apc.index$n.data
 	v.response	<- apc.index$response[apc.index$index.data]
 	v.dose		<- apc.index$dose[    apc.index$index.data]
+	n.decimal	<- apc.index$n.decimal
 	##############################
 	#	get design
 	#		design matrix 
@@ -247,9 +250,10 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	difdif		<- get.design$difdif
 	##############################
 	#	REGRESSION
-	#	Poisson regression for response only and with log link
+	#	Binomial/logistic regression with logit link
 	if(model.family=="binomial.dose.response")
 		fit	<- glm.fit(design,cbind(v.response,v.dose-v.response),family=binomial(link="logit"))
+	#	Poisson regression for response only and with log link
 	if(model.family=="poisson.response")
 		fit	<- glm.fit(design,v.response,family=poisson(link="log"))	
 	if(model.family=="od.poisson.response")
@@ -290,13 +294,13 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	if(slopes[3])	names	<- c(names,"cohort slope")
 	if(difdif[1])
 		for(i in 1:(age.max-2))
-			names	<- c(names,paste("DD_age_"   ,as.character((dates[index.age,1])[i]),sep=""))
+			names	<- c(names,paste("DD_age_"   ,apc.internal.function.date.2.character((dates[index.age,1])[i],n.decimal),sep=""))
 			if(difdif[2])
 		for(i in 1:(per.max-2))
-			names	<- c(names,paste("DD_period_",as.character((dates[index.per,1])[i]),sep=""))
+			names	<- c(names,paste("DD_period_",apc.internal.function.date.2.character((dates[index.per,1])[i],n.decimal),sep=""))
 	if(difdif[3])
 		for(i in 1:(coh.max-2))
-			names	<- c(names,paste("DD_cohort_",as.character((dates[index.coh,1])[i]),sep=""))
+			names	<- c(names,paste("DD_cohort_",apc.internal.function.date.2.character((dates[index.coh,1])[i],n.decimal),sep=""))
 	##############################
 	#	Get coefficients and covariance
 	coefficients.canonical	<- summary.glm(fit)$coefficients

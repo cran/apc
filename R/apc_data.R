@@ -1,6 +1,6 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 18 Mar 2015, version 1.0.3
+#	Bent Nielsen, 6 Feb 2016, version 1.2
 #	Data list and Data examples
 #######################################################
 #	Copyright 2014, 2015 Bent Nielsen
@@ -21,11 +21,159 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #######################################################
 
+apc.data.list	<- function(response, data.format, dose=NULL, age1=1, per1=1, coh1=1, unit=1, per.zero=NULL, per.max=NULL, time.adjust=0, label=NULL, n.decimal=NULL)
+#	BN 1 Feb 2016: 	Added argument n.decimal
+#	BN 8 Sep 2015:	Added argument label
+#	BN 24 apr 2015
+#	This function constructs list of apc.data.list type.
+#	This gives the user a single focus for entering information about the data.
+#	Only response and data.format are obligatory input.
+#	in:		response		matrix of responses
+#			dose			NULL or matrix of dose.
+#			data.format		character indicating format of data.matrix
+#									"AP"		has    age/period as increasing row/column index
+#									"AC"		has    age/cohort as increasing row/column index
+#									"CA"		has cohort/age    as increasing row/column index
+#									"CL"		has cohort/age 	  as increasing row/column index, triangular
+#									"CP"		has cohort/period as increasing row/column index
+#									"PA"		has period/age    as increasing row/column index
+#									"PC"		has period/cohort as increasing row/column index
+#									"trapezoid"	has    age/period as increasing row/column index,
+#													period-diagonals are NA for period <= per.zero and >per.zero+per.max 
+#			age1			smallest age    index (not used for data.format="CP", "PC")
+#			per1			smallest period index (not used for data.format="AC","CA","CL","CL.vector.by.row","trapezoid")
+#			coh1			smallest cohort index (not used for data.format="AP","PA")
+#			unit			time units for indices
+#  			per.zero		Only used for data.format="trapezoid".
+#									Entries in upper triangle with period <= per.zero are interpreted as NA.
+#  			per.max 		Only used for data.format="trapezoid".
+# 	 								Entries in lower triangle with period > per.zero+per.max are interpreted as NA.
+#			time.adjust		Only two of age1, per1, coh1 are used.
+#							The third is computed according to the formula
+#							age1+coh1=per1+time.adjust
+#			label			character.
+#							particularly useful with multiple data sets
+#	out		list including all 8 arguments.
+{	#	apc.data.list
+	##############################
+	#	check obligatory input
+	data.format.list		<- c("AP","AC","CA","CL","CP","PA","PC","trap","trapezoid")
+	data.format.list.matrix	<- c("AP","AC","CA","CL","CP","PA","PC","trap","trapezoid")
+	if(isTRUE(data.format %in% data.format.list)==FALSE)
+		return(cat("apc.error: model.family has wrong argument \n"))
+	if(is.matrix(response)==FALSE)
+		return(cat("apc.error: response is not a matrix \n"))
+	#	check "CL" input
+	if(data.format=="CL")
+	{
+		if(ncol(response) != nrow(response))	return(cat("apc.error: Response matrix is not square \n"))
+		k	<- nrow(response)
+		for(age in 2:k)
+			for(coh in (k+2-age):k)
+				if(is.na(response[coh,age])==FALSE) return(cat("apc.error: Lower triangle of response matrix should be NA \n"))
+	}		
+	##############################
+	if(data.format=="trap")			data.format	<- "trapezoid"
+	if(data.format=="trapezoid")
+	{
+		if(is.null(per.zero))	per.zero	<-0;
+		if(is.null(per.max))	per.max	<-nrow(response)+ncol(response)-1-per.zero;
+	}
+	else
+	{	per.zero	<- NULL;
+		per.max	<- NULL;
+	}
+	##############################
+	#	row and column names
+	function.get.dim.names <- function(m,x1,x.unit,y1,y.unit)
+	{	#	function.get.dim.names
+		function.one.set.of.names <- function(mm,dim1,dim.unit)
+		{	#	function.one.set.of.names
+			dim.length	<- nrow(mm)
+#			if(is.integer(dim.unit) && dim.unit>1)
+#				dim.names	<- paste(as.character(seq(from=dim1,length=dim.length,by=dim.unit)),
+#							 		 "-",
+#							 		 as.character(seq(from=dim1,length=dim.length,by=dim.unit)+dim.unit-1),
+#									 sep="")
+#			else									 
+				dim.names	<- as.character(seq(from=dim1,length=dim.length,by=dim.unit))
+			return(dim.names)						 
+		}	#	function.one.set.of.names
+		if(is.null(rownames(m)))
+			rownames(m) <- function.one.set.of.names(m,x1,x.unit)
+		if(is.null(colnames(m)))
+			colnames(m) <- function.one.set.of.names(t(m),y1,y.unit)
+		return(m)
+	}	#	function.get.dim.names
+	if(data.format %in% c("AC","trap","trapezoid"))
+		{	x1 <- age1; y1 <- coh1	}
+	if(data.format %in% c("CA","CL"))
+		{	x1 <- coh1; y1 <- age1	}	
+	if(data.format %in% c("AP"))
+		{	x1 <- age1; y1 <- per1	}	
+	if(data.format %in% c("PA"))
+		{	x1 <- per1; y1 <- age1	}	
+	if(data.format %in% c("CP"))
+		{	x1 <- coh1; y1 <- per1	}	
+	if(data.format %in% c("PC"))
+		{	x1 <- per1; y1 <- coh1	}	
+	response 	<- function.get.dim.names(response,x1,unit,y1,unit)
+	if(is.null(dose)==FALSE)
+		dose	<- function.get.dim.names(dose,	x1,unit,y1,unit)
+	##############################
+	#	n decimal
+	if(is.null(n.decimal))
+		if(unit<1 && unit>=1/20)	n.decimal	<- 2
+	##############################
+	return(list(response	=response	,
+				dose		=dose		,
+				data.format	=data.format,
+				age1		=age1		,
+				per1		=per1		,
+				coh1		=coh1		,
+				unit		=unit		,
+				per.zero	=per.zero	,
+				per.max		=per.max	,
+				time.adjust	=time.adjust,
+				label		=label		,
+				n.decimal	=n.decimal	))
+}	#	apc.data.list
+
+vector.2.triangle	<- function(v,k)
+#	BN 7 Feb 2015
+#	function to organise a vector as a triangle.
+#	useful for reserving data
+#	in:		v		vector. Length k*(k+1)/2
+#			k		integer. Dimension	
+#	out:	m		matrix with "CL" format Dimension kxk.
+#					Upper left triangle filled by v, row by row.
+#					Remaining entries NA
+{	#	vector.2.triangle	
+	##############################
+	#	Check input
+	if(is.vector(v)==FALSE)		return(cat("vector.2.triangle: v is not a vector \n"))
+	if(length(v) != k*(k+1)/2)	return(cat("vector.2.triangle: Length of v does not match k\n"))
+	##############################
+	#	turn into matrix
+	m	<- matrix(nrow=k,ncol=k,data=NA)
+	i	<- 0
+	for(coh in 1:k)
+	{
+		m[coh,1:(k+1-coh)]	<- v[(i+1):(i+k+1-coh)]
+		i	<- i+k+1-coh
+	}
+	return(m)
+}	#	vector.2.triangle	
+
+#############################################################################################
+#	SPECIFIC DATA SETS
+#############################################################################################
+
 ###############################
 #	JAPANESE BREAST CANCER DATA
 ###############################
 data.Japanese.breast.cancer	<- function()
-#	BN, 17 oct 2013
+#	BN, 24 apr 2015	(17 oct 2013)
 #	An example with A,P,C effects
 #
 #	Taken from table I of
@@ -60,28 +208,27 @@ v.cases		<- c(   88,   78,  101,  127,  179,
 				   678,  738,  878, 1140, 1683,
 				   640,  628,  656,  900, 1162,
 				   497,  463,  536,  644,  865)				 
-row.names	<- c("25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79")
-col.names	<- c("1955-1959","1960-1964","1965-1969","1970-1974","1975-1979")
+col.names	<- paste(as.character(seq(from=1955,length=5,by=5)),"-",
+			 		 as.character(seq(from=1955,length=5,by=5)+4),sep="")
+row.names	<- paste(as.character(seq(from=25  ,length=11,by=5)),"-",
+			 		 as.character(seq(from=25  ,length=11,by=5)+4),sep="")
 rates	<- matrix(data=v.rates,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
 cases	<- matrix(data=v.cases,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
-return(list(rates		=rates			,
+return(apc.data.list(
 			response	=cases			,
 			dose		=cases/rates	,
 			data.format	="AP"			,
 			age1		=25				,
 			per1		=1955			,
-			coh1		=NULL			,
 			unit		=5				,
-			per.zero	=NULL			,
-			per.max	=NULL				,
-			time.adjust	=0				))
+			label		="Japanese breast cancer"))
 }	#	data.Japanese.breast.cancer
 
 ##################################
 #	ITALIAN BLADDER CANCER DATA
 ##################################
 data.Italian.bladder.cancer	<- function()
-#	BN, 17 oct 2013
+#	BN, 24 apr 2015 (17 oct 2013)
 #	An example with A,C effects
 #
 #	Taken from table IV of
@@ -116,24 +263,20 @@ v.cases		<- c(   3,   3,   1,   4,  12,
 				  891,1266,1829,2395,3028,
 				  920,1243,1584,2292,3176,
 				  831, 937,1285,1787,2659)
-				 			 
-row.names	<- c("25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79")
-col.names	<- c("1955-1959","1960-1964","1965-1969","1970-1974","1975-1979")
-
+col.names	<- paste(as.character(seq(from=1955,length=5,by=5)),"-",
+			 		 as.character(seq(from=1955,length=5,by=5)+4),sep="")
+row.names	<- paste(as.character(seq(from=25  ,length=11,by=5)),"-",
+			 		 as.character(seq(from=25  ,length=11,by=5)+4),sep="")
 rates	<- matrix(data=v.rates,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
 cases	<- matrix(data=v.cases,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
-
-return(list(rates		=rates			,
+return(apc.data.list(
 			response	=cases			,
 			dose		=cases/rates	,
 			data.format	="AP"			,
 			age1		=25				,
 			per1		=1955			,
-			coh1		=NULL			,
 			unit		=5				,
-			per.zero	=NULL			,
-				per.max	=NULL			,
-			time.adjust	=0				))
+			label		="Italian bladder cancer"))
 }	#	data.Italian.bladder.cancer
 
 ##################################
@@ -178,24 +321,80 @@ v.cases		<- c(  3,  2,  7,  3, 10,
 				 219,267,323,325,343,
 				 223,250,308,412,358,
 				 198,214,253,338,312)
-row.names	<- c("25-29","30-34","35-39","40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79")
 col.names	<- c("1955-1959","1960-1964","1965-1969","1970-1974","1975-1978")
+row.names	<- paste(as.character(seq(from=25  ,length=11,by=5)),"-",
+			 		 as.character(seq(from=25  ,length=11,by=5)+4),sep="")
 rates	<- matrix(data=v.rates,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
 cases	<- matrix(data=v.cases,nrow=11, ncol=5,byrow=TRUE,dimnames=list(row.names,col.names))
-index.col	<-seq(1,4);	if(unbalanced)	index.col<-seq(1:5);
-
-return(list(rates		=rates[,index.col]			,
-			response	=cases[,index.col]			,
-			dose		=cases[,index.col]/rates[,index.col],
-			data.format	="AP"					,
-			age1		=25						,
-			per1		=1955					,
-			coh1		=NULL					,
-			unit		=5						,
-			per.zero	=NULL					,
-			per.max		=NULL					,
-			time.adjust	=0						))
+if(unbalanced==FALSE)
+	return(apc.data.list(
+			response	=cases[,(1:4)]					,
+			dose		=cases[,(1:4)]/rates[,(1:4)]	,
+			data.format	="AP"							,
+			age1		=25								,
+			per1		=1955							,
+			unit		=5								))
+if(unbalanced==TRUE)
+	return(apc.data.list(
+			response	=cases			,
+			dose		=cases/rates	,
+			data.format	="AP"			,
+			unit		=5				,
+			label		="Belgian lung cancer"))
 }	#	data.Belgian.lung.cancer
+
+###################################
+##	PROSTATE CANCER FOR NONWHITES IN THE US
+###################################
+data.US.prostate.cancer	<- function()
+##	BN, 28 apr 2015
+##	An example with over-dispersion
+##
+##	Taken from table 2 of
+##	Holford, T.R. (1983)
+##	The estimation of age, period and cohort effects for vital rates.
+##	Biometrics 39, 311-324.
+##
+##	Original Table caption:
+##	Number of prostate cancer deathrs and midperiod population for nonwhites in the
+##	U.S. by age and period
+##	Sources:
+##	Cancer deaths: National Center for Health Statistics, 1937-1973
+##	Population 1935-60: Grove and Hetzel, 1968
+##	Population 1960-69: Bureau of the Census, 1974		
+##	Population measured in 1000s
+##
+{	#	data.US.prostate.cancer
+v.deaths	<- c( 177, 271, 312, 382, 321, 305, 308,
+				  262, 350, 552, 620, 714, 649, 738,
+				  360, 479, 644, 949, 932,1292,1327,
+				  409, 544, 812,1150,1668,1958,2153,
+				  328, 509, 763,1097,1593,2039,2433,
+				  222, 359, 584, 845,1192,1638,2068,
+				  108, 178, 285, 475, 742, 992,1374)
+
+v.population<- c( 301, 317, 353, 395, 426, 473, 498,
+				  212, 248, 279, 301, 358, 411, 443,
+				  159, 194, 222, 222, 258, 304, 341,
+				  132, 144, 169, 210, 230, 264, 297,
+				   76,  94, 110, 125, 149, 180, 197,
+				   37,  47,  59,  71,  91, 108, 118,
+				   19,  22,  32,  39,  44,  56,  66)
+col.names	<- paste(as.character(seq(from=1935,length=7,by=5)),"-",
+			 		 as.character(seq(from=1935,length=7,by=5)+4),sep="")
+row.names	<- paste(as.character(seq(from=50  ,length=7,by=5)),"-",
+			 		 as.character(seq(from=50  ,length=7,by=5)+4),sep="")
+response	<- matrix(data=v.deaths		,nrow=7, ncol=7,byrow=TRUE,dimnames=list(row.names,col.names))
+dose		<- matrix(data=v.population	,nrow=7, ncol=7,byrow=TRUE,dimnames=list(row.names,col.names))
+return(apc.data.list(
+			response	=response		,
+			dose		=dose			,
+			data.format	="AP"			,
+			age1		=50				,
+			per1		=1935			,
+			unit		=5				,
+			label		="US prostate cancer"))
+}	#	data.US.prostate.cancer
 
 ##################################
 #	UK Asbestos data
@@ -253,30 +452,27 @@ v.cases	<-c(0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,1	,0	,1	,1	,0	,2	,0	,1	,2	,0	
 			0	,0	,1	,0	,0	,0	,0	,0	,0	,0	,0	,1	,0	,1	,0	,0	,2	,0	,0	,2	,1	,1	,3	,1	,2	,3	,2	,3	,5	,7	,11	,13	,14	,13	,19	,18	,37	,32	,37	,38	,38	,55	,49	,57	,48	,54	,74	,62	,57	,57	,68	,61	,73	,60	,66	,69	,54	,61	,74	,61	,53	,42	,44	,33	,32	,21	,22	,13	,6	,10	,5	,9	,0	,1	,1,
 			0	,0	,0	,0	,1	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,2	,0	,0	,1	,1	,1	,3	,4	,5	,3	,2	,9	,3	,11	,16	,4	,18	,28	,31	,33	,31	,31	,40	,58	,60	,52	,59	,63	,62	,78	,52	,57	,67	,59	,75	,81	,69	,71	,64	,56	,56	,55	,47	,39	,41	,29	,37	,19	,15	,8	,5	,10	,7	,2	,6	,5,
 			0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,0	,1	,0	,0	,2	,1	,0	,1	,0	,0	,4	,0	,0	,3	,1	,6	,2	,3	,5	,4	,9	,8	,16	,14	,27	,52	,49	,46	,39	,46	,41	,65	,45	,62	,76	,80	,58	,61	,51	,75	,67	,62	,85	,84	,65	,70	,55	,60	,58	,45	,47	,38	,36	,31	,9	,11	,10	,6	,3	,5	,3	,9)
-row.names	<- NULL			
-for(i in 1967:2007)	row.names	<- c(row.names,as.character(i))
-	col.names	<- c("5-9","10-14","15-19","20-24")
-for(i in 25:94)		col.names	<- c(col.names,as.character(i))
-	col.names	<- c(col.names,"95+")			
-cases	<- matrix(data=v.cases,nrow=41, ncol=75, byrow=TRUE,dimnames=list(row.names,col.names))
-index.columns	<- seq(5,69); if(all.age.groups)	index.columns	<- seq(1,75);
-return(list(response		=cases[,index.columns]	,
-			dose			=NULL			,
-			data.format		="PA"			,
-			age1			=25				,
-			per1			=1967			,
-			coh1			=NULL			,
-			unit			=1				,
-			per.zero		=NULL			,
-			per.max			=NULL			,
-			time.adjust		=0				))
+col.names	<- c("5-9","10-14","15-19","20-24",as.character(seq(25,94)),"95+")
+cases	<- matrix(data=v.cases,nrow=41, ncol=75, byrow=TRUE,dimnames=list(NULL,col.names))
+if(all.age.groups==FALSE)
+	return(apc.data.list(
+				response		=cases[,seq(5,69)]	,
+				data.format		="PA"			,
+				age1			=25				,
+				per1			=1967			,
+				unit			=1				))
+if(all.age.groups==TRUE)
+	return(apc.data.list(
+				response		=cases			,
+				data.format		="PA"			,
+				label			="UK mesothelioma"))
 }	#	data.asbestos						
 
 ###############################
 #	MOTOR DATA
 ###############################
 data.loss.VNJ	<- function()
-#	BN, 6 Feb 2015
+#	BN, 24 Apr 2015 (6 Feb 2015)
 #	A Chain-Ladder with A,C effects
 #
 #	Taken from tables 1,2 of
@@ -324,24 +520,20 @@ Xvec	<- c(   451288 , 339519 , 333371 , 144988 , 93243  , 45511  , 25217 , 20406
 			    554833 , 590880 , 300964 ,          
 			    537238 , 701111 ,           
 			    684944 )     
-return(list(response	=vector.2.triangle(Xvec,k)	,
-			counts		=vector.2.triangle(Nvec,k)	,
-			dose		=NULL						,
+return(c(apc.data.list(
+			response	=vector.2.triangle(Xvec,k)	,
 			data.format	="CL"						,
-			age1		=1							,
-			per1		=NULL						,
-			coh1		=1							,
-			unit		=1							,
-			per.zero	=NULL						,
-			per.max	=NULL							,
-			time.adjust	=0							))
+			time.adjust =1							,
+			label		="loss VNJ"					),			
+			list(
+			counts		=vector.2.triangle(Nvec,k)	)))
 }	#	data.loss.VNJ
 
 ###############################
 #	LOSS TRIANGLE DATA
 ###############################
 data.loss.BZ	<- function()
-#	BN, 7 Feb 2015
+#	BN, 24 Apr 2014 (7 Feb 2015)
 #	A Loss Triangle with A,P,C effects
 #
 #	Taken from table 3.5 of
@@ -373,24 +565,20 @@ Xvec	<- c(   153638,	188412,	134534,	 87456,	 60348,	42404,	31238,	21252,	16622,
 			    420778,	590400,                                                                       
 				496200)
 Exposure	<- c(     2.2,    2.4,	   2.2,	   2.0,	   1.9,	  1.6,    1.6,    1.8,    2.2,    2.5,    2.6)				
-return(list(response	=vector.2.triangle(Xvec,k)	,
-			exposure	=Exposure					,
-			dose		=NULL						,
+return(c(apc.data.list(
+			response	=vector.2.triangle(Xvec,k)	,
 			data.format	="CL"						,
-			age1		=1977						,
-			per1		=NULL						,
-			coh1		=1							,
-			unit		=1							,
-			per.zero	=NULL						,
-			per.max		=NULL						,
-			time.adjust	=0							))
+			coh1		=1977						,
+			time.adjust =1							,
+			label		="loss BZ"					),
+			exposure	=Exposure					))
 }	#	data.loss.BZ
 
 ###############################
 #	LOSS TRIANGLE DATA
 ###############################
 data.loss.TA	<- function()
-#	BN, 18 mar 2015
+#	BN, 24 Apr 2015 (18 Mar 2015)
 #	A Loss Triangle with A,C effects and over-dispersion
 #
 #	Attributed to
@@ -421,111 +609,97 @@ Xvec	<- c(	357848,	766940, 610542, 482940, 527326, 574398, 146342, 139950, 22722
 				359480,1061648,1443370,
 				376686, 986608,
 				344014)
-return(list(response	=vector.2.triangle(Xvec,k)	,
-			dose		=NULL						,
+return(apc.data.list(
+			response	=vector.2.triangle(Xvec,k)	,
 			data.format	="CL"						,
-			age1		=1							,
-			per1		=NULL						,
-			coh1		=1							,
-			unit		=1							,
-			per.zero	=NULL						,
-			per.max		=NULL						,
-			time.adjust	=0							))
+			time.adjust =1							,
+			label		="loss TA"					))
 }	#	data.loss.TA
 
-vector.2.triangle	<- function(v,k)
-#	BN 7 Feb 2015
-#	function to organise a vector as a triangle.
-#	useful for reserving data
-#	in:		v		vector. Length k*(k+1)/2
-#			k		integer. Dimension	
-#	out:	m		matrix with "CL" format Dimension kxk.
-#					Upper left triangle filled by v, row by row.
-#					Remaining entries NA
-{	#	vector.2.triangle	
-	##############################
-	#	Check input
-	if(is.vector(v)==FALSE)		return(cat("vector.2.triangle: v is not a vector \n"))
-	if(length(v) != k*(k+1)/2)	return(cat("vector.2.triangle: Length of v does not match k\n"))
-	##############################
-	#	turn into matrix
-	m	<- matrix(nrow=k,ncol=k,data=NA)
-	i	<- 0
-	for(coh in 1:k)
-	{
-		m[coh,1:(k+1-coh)]	<- v[(i+1):(i+k+1-coh)]
-		i	<- i+k+1-coh
-	}
-	return(m)
-}	#	vector.2.triangle	
-
-apc.data.list	<- function(response, data.format, dose=NULL, age1=1, per1=1, coh1=1, unit=1, per.zero=NULL, per.max=NULL, time.adjust=0)
-#	BN 6 feb 2015
-#	This function constructs list of apc.data.list type.
-#	This gives the user a single focus for entering information about the data.
-#	Only response and data.format are obligatory input.
-#	in:		response		matrix of responses
-#			dose			NULL or matrix of dose.
-#			data.format		character indicating format of data.matrix
-#									"AP"		has    age/period as increasing row/column index
-#									"AC"		has    age/cohort as increasing row/column index
-#									"CA"		has cohort/age    as increasing row/column index
-#									"CL"		has cohort/age 	  as increasing row/column index, triangular
-#									"CP"		has cohort/period as increasing row/column index
-#									"PA"		has period/age    as increasing row/column index
-#									"PC"		has period/cohort as increasing row/column index
-#									"trapezoid"	has    age/period as increasing row/column index,
-#													period-diagonals are NA for period <= per.zero and >per.zero+per.max 
-#			age1			smallest age    index (not used for data.format="CP", "PC")
-#			per1			smallest period index (not used for data.format="AC","CA","CL","CL.vector.by.row","trapezoid")
-#			coh1			smallest cohort index (not used for data.format="AP","PA")
-#			unit			time units for indices
-#  			per.zero		Only used for data.format="trapezoid".
-#									Entries in upper triangle with period <= per.zero are interpreted as NA.
-#  			per.max 		Only used for data.format="trapezoid".
-# 	 								Entries in lower triangle with period > per.zero+per.max are interpreted as NA.
-#			time.adjust		Only two of age1, per1, coh1 are used.
-#							The third is computed according to the formula
-#							age1+coh1=per1+time.adjust
-#	out		list including all 8 arguments.
-{	#	apc.data.list
-	##############################
-	#	check obligatory input
-	data.format.list		<- c("AP","AC","CA","CL","CL.vector.by.row","CP","PA","PC","trap","trapezoid")
-	data.format.list.matrix	<- c("AP","AC","CA","CL","CP","PA","PC","trap","trapezoid")
-	if(isTRUE(data.format %in% data.format.list)==FALSE)
-		return(cat("apc.error: model.family has wrong argument \n"))
-	if(isTRUE(data.format %in% data.format.list.matrix)==TRUE && is.matrix(response)==FALSE)
-		return(cat("apc.error: response is not a matrix \n"))
-	#	check "CL" input
-	if(data.format=="CL")
-	{
-		if(ncol(response) != nrow(response))	return(cat("apc.error: Response matrix is not square \n"))
-		k	<- nrow(response)
-		for(age in 2:k)
-			for(coh in (k+2-age):k)
-				if(is.na(response[coh,age])==FALSE) return(cat("apc.error: Lower triangle of response matrix should be NA \n"))
-	}		
-
-	##############################
-	if(data.format=="trap")			data.format	<- "trapezoid"
-	if(data.format=="trapezoid")
-	{
-		if(is.null(per.zero))	per.zero	<-0;
-		if(is.null(per.max))	per.max	<-nrow(response)+ncol(response)-1-per.zero;
-	}
-	else
-	{	per.zero	<- NULL;
-		per.max	<- NULL;
-	}
-	return(list(response	=response	,
-				dose		=dose		,
-				data.format	=data.format,
-				age1		=age1		,
-				per1		=per1		,
-				coh1		=coh1		,
-				unit		=unit		,
-				per.zero	=per.zero	,
-				per.max		=per.max	,
-				time.adjust	=time.adjust))
-}	#	apc.data.list
+###############################
+#	AIDS reports in England and Wales
+###############################
+data.aids	<- function(all.age.groups=FALSE)
+#	BN, 7 Feb 2016
+#	Numbers of AIDS reports in England and Wales to the end of 1992 by quarter
+#	
+#	Attributed to
+#	De Angelis and Gilks (1994)
+#
+#	Analysed in
+#
+#	Davison, A.C. and Hinkley, D.V. (1997) Bootstrap methods and their applications, Cambridge UP
+{	#	data.aids
+	#	data for coh 1983:3 to 1989:1
+	v.cases		<- c(	2,	6,	0,	1,	1,	0,	0,	1,	0,	0,	0,	0,	0,	0,	1,
+						2,	7,	1,	1,	1,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,
+						4,	4,	0,	1,	0,	2,	0,	0,	0,	0,	2,	1,	0,	0,	0,
+						0, 10,	0,	1,	1,	0,	0,	0,	1,	1,	1,	0,	0,	0,	0,
+						6, 17,	3,	1,	1,	0,	0, 	0,	0,	0,	0,	1,	0,	0,	1,
+						5, 22, 	1,	5,	2,	1,	0,	2,	1,	0,	0,	0,	0,	0,	0,
+						4, 23, 	4,	5, 	2,	1,	3,	0,	1,	2,	0,	0,	0,	0,	2,
+					   11, 11, 	6,	1,	1,	5,	0,	1,	1,	1,	1,	0,	0,	0,	1,
+					    9, 22,	6,	2,	4,	3,	3,	4,	7,	1,	2,	0,	0,	0,	0,
+						2, 28,	8,	8,	5,	2,	2,	4,	3,	0,	1,	1,	0,	0,	1,
+						5, 26, 14,	6,	9,	2,	5,	5,	5,	1,	2,	0,	0,	0,	2,
+						7, 49, 17, 11, 	4, 	7, 	5, 	7,	3,	1,	2,	2, 	0,	1,	4,
+					   13, 37, 21,	9,	3,	5, 	7,	3,	1,	3,	1,	0,	0,	0,	6,
+					   12, 53, 16, 21,	2,	7,	0,	7,	0,	0,	0,	0,	0,	1,	1,
+					   21, 44, 29, 11,	6,	4,	2,	2,	1,	0,	2,	0,	2,	2, 	8,
+					   17, 74, 13, 13,	3,	5,	3,	1,	2,	2,	0,	0,	0,	3,	5,
+					   36, 58, 23, 14,  7,	4,	1,	2,	1,	3,	0,	0,	0,	3,	1,
+					   28, 74, 23, 11,	8,	3,	3,	6,	2,	5,	4,	1,	1,	1,	3,
+					   31, 80, 16,	9,	3,	2,	8,	3,	1,	4,	6,	2,	1,	2,	6,
+					   26, 99, 27, 	9,	8, 11,	3,	4,	6,	3,	5,	5,	1,	1, 	3,
+					   31, 95, 35, 13, 18,	4,	6,	4,	4,	3,	3,	2,	0,	3,	3,
+					   36, 77, 20, 26, 11,	3,	8,	4,	8,	7,	1,	0,	0,	2,	2,
+					   32, 92, 32, 10, 12, 19, 12,	4,	3,	2, 	0,	2,	2, 	0,	2,
+					   15, 92, 14, 27, 22, 21, 12,	5,	3,	0,	3,	3,	0,	1,	1,
+					   34,104, 29, 31, 18,	8,	6,	7, 	3,	8,	0,	2,	1,	2, NA, 
+					   38,101, 34, 18, 	9, 15, 	6,	1,	2,	2,	2,	3,	2, NA, NA, 
+					   31,124, 47, 24, 11, 15,	8,	6,	5,	3,	3,	4, NA, NA, NA, 
+					   32,132, 36, 10,	9,	7,	6,	4,	4,	5,	0, NA, NA, NA, NA, 
+					   49,107, 51, 17, 15,  8,	9,	2,	1,	1, NA, NA, NA, NA, NA, 
+					   44,153, 41, 16, 11,	6,	5,	7,	2, NA, NA, NA, NA, NA, NA, 
+					   41,137, 29, 33,	7, 11,	6,	4,	3, NA, NA, NA, NA, NA, NA, 
+					   56,124, 39, 14, 12, 	7, 10,	1, NA, NA, NA, NA, NA, NA, NA, 
+					   53,175, 35, 17, 13, 11, 	2, NA, NA, NA, NA, NA, NA, NA, NA, 
+					   63,135, 24, 23, 12,	1, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
+					   71,161, 48, 25, 	5, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
+					   95,178, 39,	6, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
+					   76,181, 16, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+					   67, 66, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA)
+col.names	<- c("0*",as.character(seq(1,13)),"14+")
+cases.all	<- matrix(data=v.cases,nrow=38, ncol=15, byrow=TRUE,dimnames=list(NULL,col.names))
+cases.clean	<- cases.all
+for(row in 0:7)
+	cases.clean[38-row,2+row]	<- NA
+if(all.age.groups==FALSE)
+	return(apc.data.list(
+				response		=t(cases.clean)		,
+				data.format		="trap"				,
+				age1			=0					,
+				coh1			=1983.5				,
+				unit			=1/4				,
+				per.zero		=0					,
+				per.max			=38					,
+				label			="UK AIDS - clean"	,
+				))
+if(all.age.groups==TRUE)
+	return(apc.data.list(
+				response		=cases.all			,
+				data.format		="CA"				,
+				age1			=0					,
+				coh1			=1983.5				,
+				unit			=1/4				,
+				label			="UK AIDS - all: last column reporting delay >= 14, last diagonal: incomplete count",
+				))	
+}	#	data.aids
+# 	apc.fit.table(data.Aids(),"od.poisson.response")
+# 	fit <- apc.fit.model(data.Aids(),"poisson.response","AC")
+#	forecast <- apc.forecast.ac(fit)
+#	data.sums.coh <- apc.data.sums(data.Aids())$sums.coh
+#	forecast.total <- forecast$response.forecast.coh
+#	forecast.total[,1]	<- forecast.total[,1]+data.sums.coh[26:38]
+#	plot(seq(1983.5,1992.75,by=1/4),data.sums.coh,xlim=c(1988,1993),ylim=c(200,600),main="Davison, Hinkley, Fig 7.6, parametric version")
+#	apc.polygon(forecast.total,x.origin=1989.5,unit=1/4)
