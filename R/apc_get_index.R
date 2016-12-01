@@ -1,6 +1,6 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 4 Jan 2016, version 1.2
+#	Bent Nielsen, 16 Apr 2016, version 1.2.1
 #	function to get indices of data and to generate sub sets of data
 #######################################################
 #	Copyright 2014-2016 Bent Nielsen
@@ -22,6 +22,7 @@
 #######################################################
 
 apc.get.index	<- function(apc.data.list)
+#	BN 11 Apr 2016: check age1, per1, coh1
 #	BN 4 Jan 2016:  check values added.
 #					change coh1 for "AP" and "PA"	
 #	BN 6 Feb 2015
@@ -88,7 +89,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- age.max-1
 		age1		<- age1
 		per1		<- per1
-		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust+1		# 4 Jan 2016: add 1
+		coh1		<- per1 - (per.zero*unit+age1)+time.adjust							# 16 Apr 2016: corrected
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		col	<- 0
@@ -186,7 +187,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- coh.max-1
 		per1		<- per1
 		coh1		<- coh1
-		age1		<- per1 - ((coh.max-1)*unit+coh1)+time.adjust
+		age1		<- per1 - (per.zero*unit+coh1)+time.adjust
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		col	<- 0
@@ -216,7 +217,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- age.max-1
 		age1		<- age1
 		per1		<- per1
-		coh1		<- per1 - ((age.max-1)*unit+age1)+time.adjust+1		# 4 Jan 2016: add 1
+		coh1		<- per1 - (per.zero*unit+age1)+time.adjust							# 16 Apr 2016: corrected
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		row	<- 0
@@ -246,7 +247,7 @@ apc.get.index	<- function(apc.data.list)
 		per.zero	<- coh.max-1
 		per1		<- per1
 		coh1		<- coh1
-		age1		<- per1 - ((coh.max-1)*unit+coh1)+time.adjust
+		age1		<- per1 - (per.zero*unit+coh1)+time.adjust
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		index.trap	<- matrix(nrow=n.data,ncol=2)
 		row	<- 0
@@ -277,7 +278,7 @@ apc.get.index	<- function(apc.data.list)
 		n.data		<- nrow*ncol - per.zero*(per.zero+1)/2 - dim.lower*(dim.lower+1)/2
 		age1		<- age1
 		coh1		<- coh1
-		per1		<- age1+coh1-1+per.zero*unit-time.adjust
+		per1		<- age1+coh1+per.zero*unit-time.adjust				#	Changed 10 April 2016
 		index.data	<- matrix(nrow=n.data,ncol=2)
 		col	<- 0
 		for(age in 1:age.max)

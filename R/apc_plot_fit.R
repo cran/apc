@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 26 Apr 2015, version 1.1.1
+#	Bent Nielsen, 17 Sep 2016, version 1.2.2
 #	function to plot fit
 #######################################################
-#	Copyright 2014, 2015 Bent Nielsen
+#	Copyright 2014-2016 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -26,6 +26,7 @@
 ###########################################
 
 apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detrend",sub.plot=NULL,main.outer=NULL,main.sub=NULL,cex=NULL,cex.axis=NULL)
+#	BN 17 Sep 2016: Warning message changed
 #	BN 3 Apr 2015
 #	in		apc.fit.model	list
 #			type			character
@@ -286,7 +287,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 			y.lower	<- min(0,min(function.scale(est,scale)),max(2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE)))
 			y.upper	<- max(0,max(function.scale(est,scale)),min(2*max(function.scale(est,scale)),min(function.scale(sdv0+sdv,scale),na.rm=TRUE)))
 			if(max(est)-min(est)<min(sdv,na.rm=TRUE)/2)
-				cat("apc.plot.fit warning: sdv large in for plot",i,"- possibly not plotted\n")
+				cat("WARNING apc.plot.fit: sdv large in for plot",i,"- possibly not plotted\n")
 			################
 			#	remove tick marks if intercept
 			xaxt="s"
@@ -376,6 +377,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 ##################################################
 
 apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,24,25),col=c("black","green","blue","red"),bg=NULL,cex=NULL,main=NULL)
+#	BN 28 Sep 2016 corrected gaussian rates
 #	BN 26 Apr 2015
 #	in	apc.fit.model		output from apc.fit.model
 {	#	apc.plot.fit.pt
@@ -403,9 +405,12 @@ apc.plot.fit.pt	<- function(apc.fit.model,do.plot=TRUE,do.value=FALSE,pch=c(21,2
 	if(isTRUE(model.family %in% c("poisson.response","poisson.dose.response")))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- ppois(v.response[row],v.fitted.values[row])
-	if(isTRUE(model.family %in% c("gaussian.response","gaussian.rates")))
+	if(isTRUE(model.family %in% c("gaussian.response")))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- pnorm(v.response[row],v.fitted.values[row],sqrt(sigma2))
+	if(isTRUE(model.family %in% c("gaussian.rates")))
+		for(row in 1:n.data)
+			pt.fit[row,]	<- pnorm(v.response[row]/v.dose[row],v.fitted.values[row],sqrt(sigma2))
 	if(isTRUE(model.family=="binomial.dose.response"))
 		for(row in 1:n.data)
 			pt.fit[row,]	<- pbinom(v.response[row],v.dose[row],v.fitted.values[row])

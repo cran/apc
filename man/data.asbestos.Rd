@@ -1,5 +1,8 @@
 \name{data.asbestos}
 \alias{data.asbestos}
+\alias{data.asbestos.2013}
+\alias{data.asbestos.2013.women}
+\alias{data.asbestos.2013.men}
 \title{Asbestos data}
 \description{
 Function that organises asbestos data in \code{\link{apc.data.list}} format.
@@ -8,9 +11,16 @@ Counts of mesothelioma deaths in the UK by age and period.   Mesothelioma is mos
 
 The data set is in "PA"-format.
 
+\code{data.asbestos} is for men 1967-2012
+\code{data.asbestos.2013} is the same as \code{data.asbestos.2013.men} and is for men 1968-2013.
+\code{data.asbestos.2013.women} and is for women 1968-2013.
+
 The primary data set includes ages 25-89, which is obtained when using the function without arguments or with argument \code{all.age.groups=FALSE}. The secondary data includes younger and older age groups, which is obtained when using the function with argument \code{all.age.groups=TRUE}. The \code{apc.package} is at present not aimed at such unbalanced data.
 }
-\usage{data.asbestos(all.age.groups = FALSE)}
+\usage{data.asbestos(all.age.groups = FALSE)
+data.asbestos.2013(all.age.groups = FALSE)
+data.asbestos.2013.women(all.age.groups = FALSE)
+data.asbestos.2013.men(all.age.groups = FALSE)}
 \arguments{
   	\item{all.age.groups}{logical.  If FALSE (default), only age groups 25-89 are included.}
 }
@@ -28,11 +38,23 @@ The primary data set includes ages 25-89, which is obtained when using the funct
 	\item{label}{character.  "UK asbestos".}
 }
 \source{Data were prepared for the Asbestos Working Party by the UK Health and Safety Executive.
-An APC analysis of these data can be found in Martinez Miranda, Nielsen and Nielsen (2015)}
+An APC analysis of these data can be found in
+Martinez Miranda, Nielsen and Nielsen (2015).
+The results of that paper are reproduced in 
+the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/ReproducingMMNN2015.pdf}{ReproducingMMNN2015.pdf}.
+These data are also used in Nielsen (2015).
+
+The updated data set \code{data.asbestos.2013} is for 1968-2013 and has the same structure. This is analysed in
+Martinez-Miranda, Nielsen and Nielsen (2016).
+}
 \references{
 Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
+
+Martinez-Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2016) A simple benchmark for mesothelioma projection for Great Britain. To appear in \emph{Occupational and Environmental Medicine}. \emph{Download}: \href{https://www.nuffield.ox.ac.uk/economics/papers/2016/MartinezMirandaNielsenNielsen_AsbestosBenchmark.pdf}{Nuffield DP}.
+
+Nielsen, B. (2015) apc: An R package for age-period-cohort analysis. R Journal 7, 52-64. \emph{Download}: \href{https://journal.r-project.org/archive/2015-2/nielsen.pdf}{Open access}.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 8 September 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 30 April 2016}
 \seealso{General description of \code{\link{apc.data.list}} format.
 }
 \examples{

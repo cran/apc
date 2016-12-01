@@ -6,7 +6,7 @@
 			 Plots data using all combinations of two time scales using \code{\link{apc.plot.data.within}}.
 			 Level plots of data using \code{\link{apc.plot.data.level}}.
 			 The latter plot is done for responses and if applicable also for doses and mortality rates.}
-\usage{apc.plot.data.all(apc.data.list,log ="y",rotate=FALSE)}
+\usage{apc.plot.data.all(apc.data.list,log ="",rotate=FALSE)}
 \arguments{
   \item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
   \item{log}{Optional \code{\link{plot}} argument. Character. "y" if y-scale is logarithmic, otherwise "". Default is "y".}

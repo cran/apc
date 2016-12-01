@@ -1,6 +1,22 @@
 Package: apc
-Version: 1.2
-Date: 2016-03-19
+Version: 1.3
+Date: 2016-11-17
+
+--------------------------------------------------	
+
+CHANGES in version 1.3
+Improvements
+	apc.fit.model			model.family="od.poisson.response" added, uses "quasipoisson" family
+	apc.fit.table			model.family="od.poisson.response" added
+	apc.forecast.apc		new
+	apc.plot.data.within	can take averages or sums
+ 	apc.data.sums			can take averages or sums
+Bugs
+	apc.data.list			defaults for time labels fixed
+							model.design.reference option added.
+	apc.plot.fit.pt			dependent variable corrected for gaussian.rates		
+	
+--------------------------------------------------	
 
 CHANGES in version 1.2
 New functions

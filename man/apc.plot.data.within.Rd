@@ -11,14 +11,16 @@
 	In practice these plots should possibly be used with care, see Italian bladder cancer example below.}
 \usage{apc.plot.data.within(apc.data.list,
 					data.type="r",plot.type="awc",
+					average=FALSE,
 					thin=NULL,apc.index=NULL,
-					ylab=NULL,type="o",log="y",legend=TRUE,
+					ylab=NULL,type="o",log="",legend=TRUE,
 					lty=1:5,col=1:6,bty="n",main=NULL,
 					x="topleft",return=FALSE)
 apc.plot.data.within.all.six(apc.data.list,
 					data.type="r",
+					average=FALSE,
 					thin=NULL,apc.index=NULL,
-					ylab=NULL,type="o",log="y",legend=TRUE,
+					ylab=NULL,type="o",log="",legend=TRUE,
 					lty=1:5,col=1:6,bty="n",main.outer=NULL,
 					x="topleft")
 }				
@@ -30,12 +32,13 @@ apc.plot.data.within.all.six(apc.data.list,
 	\item{plot.type}{Optional. "awp", "pwa" "awc", "cwa, "cwp", "pwc":
 						for example: "awp" gives time series in age within each period level:
 						for an AP data-array these are the column sums.}					
-  	\item{thin}{Optional. Numerical.  age/periods/cohorts are grouped in groups of size thin.
+	\item{average}{Optional.  Logical. If TRUE/FALSE reports averages/sums. Default is FALSE.}
+	\item{thin}{Optional. Numerical.  age/periods/cohorts are grouped in groups of size thin.
 						Default is computed from dimensions of data.  A warning is produced if dimension is not divisible by thin, so that one group is smaller than other groups.}
 	\item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
   	\item{ylab}{Optional \code{\link{plot}} argument.  Character.  Common label for y-axes. Default is "".}
 	\item{type}{Optional \code{\link{plot}} argument. Character. "o" if overlaid points and lines. "l" if lines. "p" if points. Default is "o".}
-  	\item{log}{Optional \code{\link{plot}} argument. Character. "y" if y-scale is logarithmic, otherwise "". Default is "y"}
+  	\item{log}{Optional \code{\link{plot}} argument. Character. "y" if y-scale is logarithmic, otherwise "". Default is ""}
   	\item{legend}{Optional \code{\link{plot}} argument. Logical. Should legends be drawn? Default is TRUE.}
   	\item{lty}{Optional \code{\link{plot}} argument. Vector of line types.
 			The first element is for the first column, the second element for the second column, etc.,
@@ -63,7 +66,7 @@ Clayton, D. and Schifflers, E. (1987b) Models for temperoral variation in cancer
 
 Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2014) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. To appear in \emph{Journal of the Royal Statistical Society} A. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 25 Apr 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 17 Nov 2016 (25 Apr 2015)}
 \seealso{
 \code{\link{data.Japanese.breast.cancer}},
 \code{\link{data.Italian.bladder.cancer}} and

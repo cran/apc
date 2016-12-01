@@ -2,16 +2,20 @@
 \alias{apc.forecast.ac}
 \title{Forecast for Poisson response model with AC structure.}
 \description{Computes forecasts for a model with AC structure.  Forecasts of the linear predictor are given for all models.
-Distributions forecasts are provided for Poisson response model.  Distribution forecasts are based on Martinez Miranda, Nielsen and Nielsen (2015). This is done for the triangle which shares age and cohort indices with the data.}
+Distributions forecasts are provided for a Poisson response model (using Martinez Miranda, Nielsen and Nielsen, 2015)
+and for an over-dispersed Poisson response model (using Harnau and Nielsen, 2016).
+This is done for the triangle which shares age and cohort indices with the data.}
 \usage{apc.forecast.ac(apc.fit,sum.per.by.age=NULL,
-							   sum.per.by.coh=NULL,
-							   covariance.output=FALSE,
-							   suppress.warning=TRUE)}
+sum.per.by.coh=NULL,
+quantiles=NULL,
+suppress.warning=TRUE)}
 \arguments{
   \item{apc.fit}{List. Output from \code{\link{apc.fit.model}}.
   					Note: apc.fit.model should be run with AC structure so that 
 					\code{apc.fit$model.design=="AC"}.
 					Distribution forecasts are only provided for a Poisson response model where
+					\code{apc.fit$model.family=="poisson.response"}
+					and for an over-disperse Poisson response model where
 					\code{apc.fit$model.family=="poisson.response"}.
 					For other models only point forecasts of the linear predictor are provided, that is
 					the first two values \code{linear.predictors.forecast} and \code{index.trap.J}.}
@@ -21,10 +25,10 @@ Distributions forecasts are provided for Poisson response model.  Distribution f
 					represents a single age group. Point forecasts are made for the indicated age group.
 					If \code{sum.per.by.age} is a vector of length two it represents lower and upper values
 					of an range of age groups. Point forecasts are cummulated over the indicated age groups.}
-  \item{sum.per.by.coh}{\emph{Optional}. Vector.  Same as \code{sum.per.by.age}, but for cohort instead of age.}					
-  \item{covariance.output}{\emph{Optional}. Logical. If TRUE gives output for computing the
-  					covariance matrix for cell-by-cell point forecasts. This matrix can be very large.}
-	\item{suppress.warning}{Logical. If true, suppresses warnings from \code{\link{apc.data.list.subset}}, which is called internally. Default is "TRUE".}											
+  \item{sum.per.by.coh}{\emph{Optional}. Vector.  Same as \code{sum.per.by.age}, but for cohort instead of age.}
+  \item{quantiles}{\emph{Optional}. Vector.  Generates forecast quantiles for indicated quantiles.  Example:
+  					\code{quantiles=c(0.05,0.50,0.95)}. Default is NULL.}
+  \item{suppress.warning}{Logical. If true, suppresses warnings from \code{\link{apc.data.list.subset}}, which is called internally. Default is "TRUE".}											
 }
 \value{
   \item{linear.predictors.forecast}{Vector. Linear predictors for forecast area.}
@@ -66,27 +70,51 @@ Distributions forecasts are provided for Poisson response model.  Distribution f
 					the sum of data entries for the last period and the sum of the corresponding fitted values.}
  \item{intercept.correction.per.by.age}{Numeric. Only if \code{sum.per.by.age!=NULL}.}
  \item{intercept.correction.per.by.coh}{Numeric. Only if \code{sum.per.by.coh!=NULL}.}
-  \item{covariance.proc}{Matrix. Only if \code{covariance.output==TRUE}.}
-  \item{covariance.est}{Vector.  Only if \code{covariance.output==TRUE}. 
-					Note overall covariance matrix given by
-					\code{covariance.forecast=covariance.proc+diag(covariance.est)}.}
 }
-\details{The asymptotic theory for the forecast standard errors is presented in
+\details{The default output only reports standard errors.
+	By setting the argument
+	\code{quantiles}
+	to, for instance,
+	\code{quantiles=c(0.05,0.50,0.95)}
+	forecast quantiles are reported.
+
+	\emph{Poisson response forecast errors}.
+	The asymptotic theory for the Poisson forecast standard errors is presented in
 	Martinez Miranda, Nielsen and Nielsen (2015).
+	The sampling theory is based on multinomial model, conditional on the total number of outcomes.
+	Asymptotically this gives a normal theory.
+	There are two independent contributions to the forecast error:
+	a process error and an estimation error.
 	The empirical example of that paper uses the data
 	\code{\link{data.asbestos}}.
 	The results of that paper are reproduced in 
 	the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/ReproducingMMNN2015.pdf}{ReproducingMMNN2015.pdf}.
 
-	The examples below are based on the smaller data reserving set
-	\code{\link{data.loss.VNJ}}.
+	\emph{Overdispersed Poisson response forecast errors}.
+	The asymptotic theory for the overdispersed Poission forecast standard errors is presented in
+	Harnau and Nielsen (2016).
+	The sampling theory is based on infinitely devisible distributions, with the
+	compound Poisson distribution as a special case.
+	This results in scale nuisance parameter, which is estimated by
+	the deviance of the AC model divided by the degrees of freedom.
+	Asymptotically this gives a t/F theory.
+	There are three independent contributions to the forecast error:
+	a process error, an estimation error and a sampling error for the overall mean.
+	
+	The examples below are based on the smaller data reserving sets
+	\code{\link{data.loss.VNJ}},
+	\code{\link{data.loss.TA}}.
+
+	
 }
 \references{
+Harnau, J. and Nielsen (2016) Asymptotic theory for over-dispersed age-period-cohort and extended chain ladder models. Mimeo. 
+
 Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
 
 Martinez Miranda, M.D., Nielsen, B., Nielsen, J.P. and Verrall, R. (2011) Cash flow simulation for a model of outstanding liabilities based on claim amounts and claim numbers. \emph{ASTIN Bulletin} 41, 107-129.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 2 Mar 2016}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 30 June 2016 (2 Mar 2016)}
 \seealso{The example below uses Japanese breast cancer data, see \code{\link{data.Japanese.breast.cancer}}}
 \examples{
 #####################
@@ -180,4 +208,23 @@ forecast$response.forecast.per.by.coh.ic
 #	per_14  66584.160 277.64858 224.94656 162.75067
 #	per_15  34962.678 206.77289 163.00324 127.22018
 #	per_16   2392.759  61.09857  42.64257  43.75668
+
+#####################
+#  EXAMPLE with reserving data: data.loss.TA()
+#  Data used in Harnau and Nielsen (2016)
+data	<- data.loss.TA()
+fit.ac	<- apc.fit.model(data,"od.poisson.response","AC")
+forecast	<- apc.forecast.ac(fit.ac,quantiles=c(0.01,0.05,0.5,0.95,0.99))
+forecast$response.forecast.all
+#	    forecast      se se.proc  se.est  tau.est 
+#	all 18680856 2675417 1007826 2474680 134561.2
+#	...
+#	 t-0.010  t-0.050  t-0.500  t-0.950  t-0.990 
+#	12158931 14160544 18680856 23201167 25202781
+#	...
+#	 G-0.010  G-0.050  G-0.500  G-0.950  G-0.990 
+#	12760202 14398564 18553290 23417098 25792423 
+forecast$response.forecast.per
+
+
 }

@@ -3,9 +3,9 @@
 \alias{apc.fit.table}
 \title{Fits an age period cohort model}
 \description{
-\code{apc.fit.model} fits the age period cohort as a Generalized Linear Model using \code{\link{glm.fit}}.
+\code{apc.fit.model} fits the age period cohort model as a Generalized Linear Model using \code{\link{glm.fit}}.
 The model is parametrised in terms of the canonical parameter introduced by Kuang, Nielsen and Nielsen (2008),
-see also the implementation in Martinez Miranda, Nielsen and Nielsen (2013).
+see also the implementation in Martinez Miranda, Nielsen and Nielsen (2015).
 This parametrisation has a number of advantages: it is freely varying, it is the canonical parameter of a
 regular exponential family, and it is invariant to extentions of the data matrix. 
 
@@ -19,7 +19,7 @@ apc.fit.table produces a deviance table for 15 combinations of the three factors
 "APC", "AP", "AC", "PC", "Ad", "Pd", "Cd", "A", "P", "C", "t", "tA", "tP", "tC", "1".
 }
 \usage{apc.fit.model(apc.data.list,model.family,model.design,apc.index=NULL)
-apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
+apc.fit.table(apc.data.list,model.family,model.design.reference="APC",apc.index=NULL)}
 \arguments{
   	\item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
   	\item{model.family}{Character.  The following options are implemented.	These are used internally when
@@ -27,7 +27,13 @@ apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
 	  	\describe{
 			\item{"poisson.response"}{This sets family=poisson(link="log"). Only responses are used.
 				Inference is done in a multinomial model, conditioning on the overall level
-				as documented in Martinez Miranda, Nielsen and Nielsen (2013).}
+				as documented in Martinez Miranda, Nielsen and Nielsen (2015).}
+			\item{"od.poisson.response"}{This sets family=quasipoisson(link="log") in the estimation step,
+				but then reverts to family=poisson(link="log") when computing standard errors, which are then corrected.
+				Only responses are used.
+				Inference is done in an over-dispersed Poisson model
+				as documented in Harnau and Nielsen (2016).
+				Note that limit distributions are t and F not normal and chi2.}
 			\item{"poisson.dose.response"}{This sets family=poisson(link="log"). Doses are used as offset.}
 			\item{"binomial.dose.response"}{This sets family=binomial(link="logit") and gives a logistic regression.}
 			\item{"gaussian.rates"}{This sets family=gaussian(link="identity").
@@ -54,6 +60,8 @@ apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
 			\item{"tC" }{Single trend model in cohort index. Nested in "C", "t".}
 			\item{"1"  }{Constant model. Nested in "tA", "tP", "tC".}
   		}}
+	\item{model.design.reference}{Character.  This indicates the reference design choice for the deviance table. Choices are
+			"APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t". Default is "APC".}	
 	\item{apc.index}{\emph{Optional}. List. See \code{\link{apc.get.index}} for a description of the format.
 			If not provided this is computed internally.
 			If \code{apc.fit.model} is used in a simulation study computational effort can be saved when
@@ -88,12 +96,14 @@ apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
 		since we are only interested in relative effects. 
 		For the "gaussian.response" and "gaussian.dose.response" model families the dispersion is estimated from
 		the residual deviance. }
-
+	\item{"F"}{Only for "od.poisson.response". F statistic: Ratio of deviance for submodel divided by degrees of freedom to deviance of apc model divided by degrees of freedom.}
+	\item{"prof(>F)"}{Only for "od.poisson.response". F statistic: with degrees of freedom given by differences between sub-model and apc model and between apc model and saturated model.}
 	\emph{apc.fit.model}
 	returns a list. The entries are as follows.
 	\item{fit}{List. Values from \code{\link{glm.fit}}.}
 	\item{apc.index}{List. Values from \code{\link{apc.get.index}}.}	  
-	\item{coefficients.canonical}{Matrix.  For each coordinate of the canonical parameters is reported coefficient, standard deviation, z-value, which is the ratio of those, and p-value.}
+	\item{coefficients.canonical}{Matrix.  For each coordinate of the canonical parameters is reported coefficient, standard deviation, z-value, which is the ratio of those, and asymptotically normal p-values.
+									Note, for "od.poisson.response" the reported standard errors corrected by the deviance and p-values are asymptotically t distributed, see Harnau and Nielsen (2016).}
 	\item{covariance.canonical	}{Matrix.  Estimated covariance matrix for canonical parameters.}
 	\item{slopes				}{Vector.  Length three.  The design matrix found by \code{\link{apc.get.design.collinear}} has age, period, and cohort linear trends. \code{slopes} indicates which of these are actually used in estimation.}
 	\item{difdif				}{Vector.  Length three.  The design matrix found by \code{\link{apc.get.design.collinear}} has age, period, and cohort double differences. \code{slopes} indicates which of these are actually used in estimation.}
@@ -106,6 +116,9 @@ apc.fit.table(apc.data.list,model.family,apc.index=NULL)}
 	\item{RSS					}{Numeric.  Residual sum of squares.  NULL for non-gaussian families.}
 	\item{sigma2				}{Numeric.  Maximum likelihood estimator for variance: RSS/n.  NULL for non-gaussian families.}
 	\item{s2					}{Numeric.  Least squares estimator for variance: RSS/df.  NULL for non-gaussian families.}
+	\item{n.decimal				}{Numeric.  From \code{\link{apc.data.list}}.}
+	\item{predictors			}{Vector. Design*Estimates.                                          
+								  Same as the \code{\link{glm.fit}} value \code{linear.predictors} when there is no offset.}
 }
 \note{
 For gaussian families \emph{deviance} is defined differently in \code{apc} and \code{\link{glm}}.
@@ -113,13 +126,26 @@ Here it is -2 log likelihood.  In \code{\link{glm}} it is RSS.
 
 The values for \code{apc.fit.model} include the \code{\link{apc.data.list}} and the \code{apc.index} returned by
 \code{\link{apc.get.index}}.
+
+For the \code{poisson.response} the inference is conditional on the level, see Martinez Miranda, Nielsen and Nielsen (2015).
+The \code{coefficients.canonical} computed by \code{apc} are therefore different from the default \code{coefficients} computed by \code{glm}.
+
+For the \code{od.poisson.response} an asymptotic theory is used that mimics the conditioning for \code{poisson.response}.
+The asymptotic distribution are, however, asymptotically t or F distributed, see Harnau and Nielsen (2016).
+
+For \code{coefficients} the 3rd and 4th columns have headings \code{t value} and \code{Pr(>|t|)} for \code{od.poisson.response}
+to indicate an asymptotic t theory
+and otherwise
+\code{z value} and \code{Pr(>|z|)} to indicate an asymptotic normal theory. The labels are inherited from \code{\link{glm.fit}}.
 }
 \references{
+Harnau, J. and Nielsen, B. (2016) Asymptotic theory for over-dispersed age-period-cohort and extended chain ladder models. Mimeo.
+
 Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2013) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. To appear in \emph{Journal of the Royal Statistical Society A}. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55; \emph{Download}: Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 27 Aug 2014}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 26 Oct 2016 (27 Aug 2014)}
 \seealso{
 The fit is done using \code{\link{glm.fit}}.
 
@@ -204,12 +230,28 @@ m.design	<- apc.get.design(index,"APC")$design
 #	Fit using glm.fit from stats package
 fit.apc.glm	<- glm.fit(m.design,v.response,family=poisson(link="log"),offset=log(v.dose))
 
-#	Find linear predictors and express in matrix form
-m.fit		<- data.list$response			#	create matrix 
-m.fit[index$index.data]		<- m.design %*% fit.apc.glm$coefficients 
-m.fit		<- m.fit + log(data.list$dose)	#	add offset
-exp(m.fit)
+#	Get canonical coefficients
+v.cc		<- fit.apc.glm$coefficients
 
+#	Find linear predictors and express in matrix form
+m.fit		<- data.list$response			#	create matrix
+m.fit[index$index.data]		<- m.design %*% v.cc 
+m.fit.offset		<- m.fit + log(data.list$dose)	#	add offset
+exp(m.fit.offset)
+
+#	Compare with linear.predictors from glm.fit
+#	difference should be zero
+sum(abs(m.fit.offset[index$index.data]-fit.apc.glm$linear.predictors))
+
+#####################
+#	EXAMPLE 4 with Taylor-Ashe loss data
+#	This example illustrates the over-dispersed poisson response model.
+
+data <- data.loss.TA()
+fit.apc.od <- apc.fit.model(data,"od.poisson.response","APC")
+fit.apc.od$coefficients.canonical[1:5,]
+fit.apc.no.od <- apc.fit.model(data,"poisson.response","APC")
+fit.apc.no.od$coefficients.canonical[1:5,]
 }
 \keyword{ package }
 \keyword{ models }

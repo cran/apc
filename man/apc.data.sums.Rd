@@ -2,10 +2,11 @@
 \alias{apc.data.sums}
 \title{Computes age, period and cohort sums of a matrix}
 \description{Computes age, period and cohort sums of a matrix. This is the same as taking column, row and diagonal sums. The match between the age, period and cohort sums and column, row and diagonal sums depends on the data format}
-\usage{apc.data.sums(apc.data.list,data.type="r",apc.index=NULL)}
+\usage{apc.data.sums(apc.data.list,data.type="r",average=FALSE,apc.index=NULL)}
 \arguments{
   \item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
   \item{data.type}{Optional. Character. "r","d","m" if sums are computed for responses,dose,(mortality) rates.  Rates are computed as responses/doses. "r" is default.} 
+  \item{average}{Optional.  Logical. If TRUE/FALSE reports averages/sums. Default is FALSE.}
   \item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
 }
 \section{Arguments: Notes}{
@@ -25,7 +26,7 @@ Likewise \code{apc.index} does not need to be a full \code{apc.index list}. It s
   \item{sums.per}{Vector. Sums over data.matrix by period.}
   \item{sums.coh}{Vector. Sums over data.matrix by cohort.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Dec 2013 updated 4 Jan 2016}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Dec 2013 updated 17 Nov 2016}
 \seealso{The example below uses Japanese breast cancer data, see \code{\link{data.Japanese.breast.cancer}}}
 \examples{
 #####################

@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielen, 1 April 2015, version 1.0.3
+#	Bent Nielen, 19 September 2016, version 1.2.3
 #	functions to fit model
 #######################################################
-#	Copyright 2014, 2015 Bent Nielsen
+#	Copyright 2014-2016 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -83,11 +83,13 @@ apc.get.design.collinear	<- function(apc.index)
 #########################################################
 apc.get.design	<- function(apc.index,model.design=NULL)
 #	BN 27 Aug 2014
+#	BN 28 Sep 2016 (7 Sep 2015): added model designs: "-A", "-P", "-C"
 #	Constructs design matrix for an apc model or sub-model thereof.
 #	In:		apc.index or apc.fit		List of indices etc.
 #			model.design				Character. Indicates which sub-model should be fitted.
 #										Default is NULL. Possible choices:
 #										"APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1"
+#										"-A","-P","-C","-AP","-AC","-CP","-APC","-tAP","-tAC","-tPC","-tA","-tP","-tC"
 #										Argument is not needed when first argument is an apc.fit.
 #										If not NULL it will override any information in first argument.
 #	Out:	design						Matrix.
@@ -106,8 +108,10 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 	if(is.null(model.design)==TRUE & is.null(apc.index$model.design)==FALSE)
 		model.design	<- apc.index$model.design
 	model.design.list		<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
+	model.design.list.res	<- c("-A","-P","-C","-AP","-AC","-PC","-APC","-dAP","-dAC","-dPC","-dA","-dP","-dC","-tA","-tC")
+	model.design.list	<- c(model.design.list,model.design.list.res)
 	if(isTRUE(model.design %in% model.design.list)==FALSE)
-		return(cat("ERROR apc.get.design: model.design has wrong argument \n"))	
+		return(cat(c("ERROR apc.get.design: model.design has argument: ",model.design," which is not allowed \n")))	
 	##############################
 	#	get values, that are used
 	age.max		<- apc.index$age.max				
@@ -118,21 +122,36 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 	#	depending on model.design choice
 	#		slopes:		3 vector of logicals for presence of age/period/cohort slope
 	#		difdif:		3 vector of logicals for presence of age/period/cohort double differences
-	if(model.design=="APC")	{	slopes <- c(1,0,1); difdif <- c(1,1,1);	}
-	if(model.design=="AP" )	{	slopes <- c(1,0,1); difdif <- c(1,1,0);	}
-	if(model.design=="AC" )	{	slopes <- c(1,0,1); difdif <- c(1,0,1);	}
-	if(model.design=="PC" )	{	slopes <- c(1,0,1); difdif <- c(0,1,1);	}
-	if(model.design=="Ad" )	{	slopes <- c(1,0,1); difdif <- c(1,0,0);	}
-	if(model.design=="Pd" )	{	slopes <- c(1,0,1); difdif <- c(0,1,0);	}
-	if(model.design=="Cd" )	{	slopes <- c(1,0,1); difdif <- c(0,0,1);	}
-	if(model.design=="A"  )	{	slopes <- c(1,0,0); difdif <- c(1,0,0);	}
-	if(model.design=="P"  )	{	slopes <- c(0,1,0); difdif <- c(0,1,0);	}
-	if(model.design=="C"  )	{	slopes <- c(0,0,1); difdif <- c(0,0,1);	}
-	if(model.design=="t"  )	{	slopes <- c(1,0,1); difdif <- c(0,0,0);	}
-	if(model.design=="tA" )	{	slopes <- c(1,0,0); difdif <- c(0,0,0);	}
-	if(model.design=="tP" )	{	slopes <- c(0,1,0); difdif <- c(0,0,0);	}
-	if(model.design=="tC" )	{	slopes <- c(0,0,1); difdif <- c(0,0,0);	}
-	if(model.design=="1"  )	{	slopes <- c(0,0,0); difdif <- c(0,0,0);	}
+	if(model.design=="APC")	{	constant<-1; slopes <- c(1,0,1); difdif <- c(1,1,1);	}
+	if(model.design=="AP" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(1,1,0);	}
+	if(model.design=="AC" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(1,0,1);	}
+	if(model.design=="PC" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(0,1,1);	}
+	if(model.design=="Ad" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(1,0,0);	}
+	if(model.design=="Pd" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(0,1,0);	}
+	if(model.design=="Cd" )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(0,0,1);	}
+	if(model.design=="A"  )	{	constant<-1; slopes <- c(1,0,0); difdif <- c(1,0,0);	}
+	if(model.design=="P"  )	{	constant<-1; slopes <- c(0,1,0); difdif <- c(0,1,0);	}
+	if(model.design=="C"  )	{	constant<-1; slopes <- c(0,0,1); difdif <- c(0,0,1);	}
+	if(model.design=="t"  )	{	constant<-1; slopes <- c(1,0,1); difdif <- c(0,0,0);	}
+	if(model.design=="tA" )	{	constant<-1; slopes <- c(1,0,0); difdif <- c(0,0,0);	}
+	if(model.design=="tP" )	{	constant<-1; slopes <- c(0,1,0); difdif <- c(0,0,0);	}
+	if(model.design=="tC" )	{	constant<-1; slopes <- c(0,0,1); difdif <- c(0,0,0);	}
+	if(model.design=="1"  )	{	constant<-1; slopes <- c(0,0,0); difdif <- c(0,0,0);	}
+	if(model.design=="-A" )	{	constant<-0; slopes <- c(0,0,0); difdif <- c(1,0,0);	}
+	if(model.design=="-P" )	{	constant<-0; slopes <- c(0,0,0); difdif <- c(0,1,0);	}
+	if(model.design=="-C" )	{	constant<-0; slopes <- c(0,0,0); difdif <- c(0,0,1);	}
+	if(model.design=="-AP")	{	constant<-0; slopes <- c(0,0,0); difdif <- c(1,1,0);	}
+	if(model.design=="-AC")	{	constant<-0; slopes <- c(0,0,0); difdif <- c(1,0,1);	}
+	if(model.design=="-PC")	{	constant<-0; slopes <- c(0,0,0); difdif <- c(0,1,1);	}
+	if(model.design=="-APC"){   constant<-0; slopes <- c(0,0,0); difdif <- c(1,1,1);	}
+	if(model.design=="-dA") {   constant<-0; slopes <- c(1,0,0); difdif <- c(1,0,0);	}
+	if(model.design=="-dP") {   constant<-0; slopes <- c(0,1,0); difdif <- c(0,1,0);	}
+	if(model.design=="-dC") {   constant<-0; slopes <- c(0,0,1); difdif <- c(0,0,1);	}
+	if(model.design=="-dAP"){   constant<-0; slopes <- c(1,0,0); difdif <- c(1,1,0);	}
+	if(model.design=="-dAC"){   constant<-0; slopes <- c(1,0,0); difdif <- c(1,0,1);	}
+	if(model.design=="-dPC"){   constant<-0; slopes <- c(0,0,1); difdif <- c(0,1,1);	}
+	if(model.design=="-tA") {   constant<-0; slopes <- c(1,0,0); difdif <- c(0,0,0);	}
+	if(model.design=="-tC") {   constant<-0; slopes <- c(0,0,1); difdif <- c(0,0,0);	}
 	##############################
 	#	construct index for selecting columns of design matrix
 	index.design	<- c(1)
@@ -140,13 +159,15 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 	if(difdif[1])	index.design <- c(index.design,4+seq(1:(age.max-2)))	
 	if(difdif[2])	index.design <- c(index.design,2+age.max+seq(1:(per.max-2)))	
 	if(difdif[3])	index.design <- c(index.design,  age.max+per.max+seq(1:(coh.max-2)))
+	if(constant==0)	index.design <- index.design[2:length(index.design)]
 	##############################
 	#	get design matrix
 	design	<- apc.get.design.collinear(apc.index)[,index.design]
 	##############################
-	return(list(	design						= design	,
-					slopes						= slopes	,
-					difdif						= difdif	
+	return(list(	constant	= constant	,
+					design		= design	,
+					slopes		= slopes	,
+					difdif		= difdif	
 			))	
 }	#	apc.get.design
 
@@ -154,6 +175,8 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 #	apc.fit.model
 #########################################################
 apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL)
+#	BN 10 may 2016	od.poisson.response correction to coefficients.canonical
+#	BN 14 apr 2016	Added predictors
 #	BN  2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
 #					using apc.internal.function.date.2.character
 #	BN 17 mar 2015
@@ -205,17 +228,19 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 #										Only when model.family=="Gaussian.rates"
 #			s2							Least squares estimator for variance (divided by df)
 #										Only when model.family=="Gaussian.rates"
+#			predictors					Vector. Design*Estimates.
+#										Same as the glm.fit value linear.predictors when there is no offset
 {	#	apc.fit.model
 	##############################
 	#	check input
 	model.design.list		<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
-	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.response")
-	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.response")
+	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
+	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
 	model.family.mixed		<- c("poisson.response","od.poisson.response")
 	if(isTRUE(model.design %in% model.design.list)==FALSE)
-		return(cat("apc.fit.model error: model.design has wrong argument \n"))	
+		return(cat("ERROR apc.fit.model: model.design has wrong argument \n"))	
 	if(isTRUE(model.family %in% model.family.list)==FALSE)
-		return(cat("apc.fit.model error: model.family has wrong argument \n"))
+		return(cat("ERROR apc.fit.model: model.family has wrong argument \n"))
 	######################
 	#	get index
 	if(is.null(apc.index)==TRUE)
@@ -256,20 +281,28 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	#	Poisson regression for response only and with log link
 	if(model.family=="poisson.response")
 		fit	<- glm.fit(design,v.response,family=poisson(link="log"))	
+	#	Poisson regression for response only and with log link
 	if(model.family=="od.poisson.response")
-		fit	<- glm.fit(design,v.response,family=poisson(link="log"))	
+	{	#	Note: quasipoisson family avoids warnings with non integer observations
+		#	But, when it later comes to computing sdv, we go back to poisson.
+		fit	<- glm.fit(design,v.response,family=quasipoisson(link="log"))
+		fit$family$family	<- "poisson"			
+	}
 	#	Poisson regression for dose-response and with log link
 	if(model.family=="poisson.dose.response")
 		fit	<- glm.fit(design,v.response,family=poisson(link="log"),offset=log(v.dose))
 	#	Gaussian regression for response only and with identity link (Least Squares)
 	if(model.family=="gaussian.response")
 		fit	<- glm.fit(design,v.response,family=gaussian(link="identity"))
-	#	Gaussian regression for response only and with identity link (Least Squares)
+	#	Gaussian regression for rates and with identity link (Least Squares)
 	if(model.family=="gaussian.rates")
 		fit	<- glm.fit(design,v.response/v.dose,family=gaussian(link="identity"))		
 	#	Gaussian regression for log(response) and with identity link (Least Squares)
 	if(model.family=="log.normal.response")
 		fit	<- glm.fit(design,log(v.response),family=gaussian(link="identity"))
+	#	Gaussian regression for log(rates) and with identity link (Least Squares)
+	if(model.family=="log.normal.rates")
+		fit	<- glm.fit(design,log(v.response/v.dose),family=gaussian(link="identity"))		
 	##############################
 	#	construct for indices for double difference parameters  
 	index.age	<- NULL
@@ -305,6 +338,8 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	#	Get coefficients and covariance
 	coefficients.canonical	<- summary.glm(fit)$coefficients
 	rownames(coefficients.canonical)	<- names
+  	if (model.family == "od.poisson.response") 
+    	colnames(coefficients.canonical) <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")     
 	covariance.canonical	<- summary.glm(fit)$cov.scaled
 	#	Need to condition in mixed parametrisation
 	if(mixed.par)
@@ -322,6 +357,8 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	##############################
 	#	get standard errors 
 	coefficients.canonical[,2]	<- sqrt(diag(covariance.canonical))
+	if(model.family=="od.poisson.response")
+		coefficients.canonical[,2] <- coefficients.canonical[,2] * sqrt(fit$deviance/fit$df.residual)		
 	if(mixed.par | mixed.par.1)		# mixed parametrisation
 		coefficients.canonical[1,2]	<- NA
 	##############################
@@ -330,6 +367,8 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	##############################
 	#	get p-values
 	coefficients.canonical[,4]	<- 2*pnorm(abs(coefficients.canonical[  ,3]),lower.tail=FALSE)
+	if(model.family=="od.poisson.response")
+		coefficients.canonical[,4]	<- 2*pt(abs(coefficients.canonical[  ,3]),fit$df.residual,lower.tail=FALSE)		
 	##############################
 	#	get deviance, RSS and variance estimate in Gaussian case
 	#	note that glm.fit returns RSS instead of deviance in Gaussian case
@@ -338,11 +377,14 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 	s2		<- NULL
 	if(isTRUE(model.family %in% model.family.gaussian))
 	{
-		RSS				<- fit$deviance
+		RSS				<- fit$deviance			#	GLM deviance for gaussian = RSS
 		sigma2			<- RSS/n.data
 		s2				<- RSS/fit$df.residual
 		fit$deviance	<- n.data*(1+log(2*pi)+log(sigma2))
 	}	
+	##############################
+	#	predictors 14 apr 2016	
+	predictors	<- (design %*% summary.glm(fit)$coefficients)[,1]
 	##############################
 	return(c(fit,apc.index,
 				list(	model.family				= model.family					,
@@ -357,20 +399,24 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 						dates						= dates							,
 						RSS							= RSS							,
 						sigma2						= sigma2						,
-						s2							= s2							
+						s2							= s2							,
+						n.decimal					= n.decimal						,
+						predictors					= predictors			
 			)))	
 }	#	apc.fit.model
 
 #########################################################
 #	apc.fit.table
 #########################################################
-apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
+apc.fit.table	<- function(apc.data.list,model.family,model.design.reference="APC",apc.index=NULL)
+#	BN 17 may 2016: labels corrected
+#	BN 10 may 2016: reference model introduced
 #	BN 17 mar 2015
 {	#	apc.fit.table
 	######################
 	#	model families
-	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.response")
-	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.response")
+	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
+	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
 	model.family.od			<- c("od.poisson.response")
 	######################
 	#	check input
@@ -397,8 +443,18 @@ apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
 		else	
 			return(round(c(dev.R,df.R,pchisq(dev.R,df.R,lower.tail=FALSE),LR,df,pchisq(LR,df,lower.tail=FALSE),aic),digits=3))
 	}
-	######################	
-	model.design.list	<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
+	######################
+	if(model.design.reference=="APC")	model.design.list	<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
+	if(model.design.reference=="AP")	model.design.list	<- c( 	   "AP",		  "Ad","Pd", 	 "A","P",    "t","tA","tP",     "1")
+	if(model.design.reference=="AC")	model.design.list	<- c(			"AC",	  "Ad",		"Cd","A",	 "C","t","tA",	   "tC","1")
+	if(model.design.reference=="PC")	model.design.list	<- c(				 "PC",	   "Pd","Cd",	 "P","C","t",	  "tP","tC","1")
+	if(model.design.reference=="Ad")	model.design.list	<- c( 	   				  "Ad",		 	 "A",	     "t","tA",		    "1")
+	if(model.design.reference=="Pd")	model.design.list	<- c( 	   				  	   "Pd", 	 	 "P",    "t", 	  "tP",     "1")
+	if(model.design.reference=="Cd")	model.design.list	<- c(				 				"Cd",	 	 "C","t",	  	   "tC","1")
+	if(model.design.reference=="A")		model.design.list	<- c( 	   							  	 "A",	     	 "tA",		    "1")
+	if(model.design.reference=="P")		model.design.list	<- c( 	   						  	 		 "P",     	 	  "tP",     "1")
+	if(model.design.reference=="C")		model.design.list	<- c(				 					 	 	 "C",	  	 	   "tC","1")
+	if(model.design.reference=="t")		model.design.list	<- c(				 								 "t","tA","tP","tC","1")
 	######################	
 	#	number of columns
 															ncol <- 7
@@ -408,7 +464,7 @@ apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
 	#	declare table
 	fit.tab		<- matrix(nrow=length(model.design.list),ncol=ncol,data=NA)
 	#	unrestricted apc model
-	fit.apc	<- apc.fit.model(apc.data.list,model.family,model.design="APC",apc.index)	
+	fit.apc	<- apc.fit.model(apc.data.list,model.family,model.design=model.design.reference,apc.index)	
 	#	model list
 	for(i in 1:length(model.design.list))
 	{
@@ -432,11 +488,12 @@ apc.fit.table	<- function(apc.data.list,model.family,apc.index=NULL)
 	#	row names
 	rownames(fit.tab)	<- model.design.list
 	#	column names
-		colnames		<- c("-2logL","df.residual","prob(>chi_sq)","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
+	colnames.relative	<- c(paste("LR.vs.",model.design.reference,sep=""),paste("df.vs.",model.design.reference,sep=""))
+		colnames		<- c("-2logL","df.residual","prob(>chi_sq)",colnames.relative,"prob(>chi_sq)","aic")
 	if(isTRUE(model.family %in% model.family.gaussian))
-		colnames		<- c("-2logL","df.residual","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic")
+		colnames		<- c("-2logL","df.residual",colnames.relative,"prob(>chi_sq)","aic")
 	if(isTRUE(model.family %in% model.family.od))
-		colnames		<- c("-2logL","df.residual","prob(>chi_sq)","LR.vs.APC","df.vs.APC","prob(>chi_sq)","aic","F","prob(>F)")	
+		colnames		<- c("-2logL","df.residual","prob(>chi_sq)",colnames.relative,"prob(>chi_sq)","aic","F","prob(>F)")	
 	colnames(fit.tab)	<- colnames		
 	######################
 	return(fit.tab)

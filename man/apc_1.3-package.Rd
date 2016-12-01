@@ -12,8 +12,8 @@ The outline of an analysis is described below.
 	\tabular{ll}{
 		Package: \tab apc\cr
 		Type: \tab Package\cr
-		Version: \tab 1.2\cr
-		Date: \tab 2016-03-19\cr
+		Version: \tab 1.3\cr
+		Date: \tab 2016-11-16\cr
 		License: \tab GPL-3\cr
 	}
 	The apc package uses the canonical parameters suggested by
@@ -159,12 +159,14 @@ apc.plot.data.all(data.list)
 #	Or make individual plots.
 #	Plot data sums.
 
+graphics.off()
 apc.plot.data.sums(data.list)
 
 #	Plot sparsity to see where data are thin.
 #	Plots are blank with default settings
 #	... therefore change sparsity.limits.
 
+graphics.off()
 apc.plot.data.sparsity(data.list)
 dev.new()
 apc.plot.data.sparsity(data.list,sparsity.limits=c(5,10))
@@ -174,7 +176,8 @@ apc.plot.data.sparsity(data.list,sparsity.limits=c(5,10))
 #	All plots appear to have approximately parallel lines.
 #	This indicates that interpretation should be done carefully.
 
-apc.plot.data.within(data.list,"m",1)
+graphics.off()
+apc.plot.data.within.all.six(data.list,"m")
 
 #######
 #	3. Get a deviance table
@@ -212,6 +215,7 @@ fit.ad$coefficients.canonical
 #	That model is not supported by the data.  
 #	To get numerical values see apc.plot.fit.pt
 
+graphics.off()
 apc.plot.fit.all(fit.apc)
 apc.plot.fit.all(fit.ad)
 apc.plot.fit.all(fit.a)
@@ -228,6 +232,7 @@ apc.plot.fit.all(fit.a)
 #	is that they show deviations from linear trends.  The third row plots are
 #	not invariant to changes to data array
 
+graphics.off()
 apc.plot.fit(fit.apc)
 dev.new()
 apc.plot.fit(fit.ad)
@@ -257,6 +262,7 @@ apc.fit.table(data.list.subset.1,"poisson.dose.response")
 #	that have changed.  Nonetheless these plots are useful to evaulate
 #	variation in time trends over and above linear trends.
 
+graphics.off()
 data.list	<- data.Belgian.lung.cancer()
 data.list.subset <- apc.data.list.subset(data.list,2,0,0,0,0,0)
 fit.apc		<- apc.fit.model(data.list,"poisson.dose.response","APC")
