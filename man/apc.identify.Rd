@@ -10,8 +10,11 @@
 These are used either indirectly by \code{\link{apc.plot.fit}}
 or they are computed directly with this command.
 
-The ad hoc identifications are based on	Nielsen (2014b). For details see also
-the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}
+The ad hoc identifications are based on	Nielsen (2014b). For details see also the vignette
+	\href{../doc/Identification.pdf}{\code{Identification.pdf}},
+	\href{../doc/Identification.R}{\code{Identification.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}		
 or in the notes below.
 
 For model designs of any type two ad hoc identified time effects.
@@ -98,13 +101,16 @@ The linear plane is parametrised in terms of
 a level, which is the value of the predictor at 
 \code{age=cohort=1}, which is usually outside the index set for the data;
 while age and cohort slopes are adjusted for the ad hoc identification of the time effects.
+
+(3)
+Subsumes \code{var.apc.identify} from \code{apc.indiv} (25 Sep 2020)
 }
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 12 Apr 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> & Zoe Fannon 25 Sep 2020 (12 Apr 2015)}
 \seealso{The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}.}
 \examples{
 ########################

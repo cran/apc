@@ -1,9 +1,9 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 16 Apr 2016, version 1.2.1
+#	Bent Nielsen, 7 May 2017, version 1.3.1
 #	function to get indices of data and to generate sub sets of data
 #######################################################
-#	Copyright 2014-2016 Bent Nielsen
+#	Copyright 2014-2017 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -327,16 +327,15 @@ apc.get.index	<- function(apc.data.list)
 				n.decimal	=n.decimal	))
 }	#	apc.get.index
 
-####################################################
-apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
-											   per.cut.lower=0,per.cut.upper=0,
-											   coh.cut.lower=0,coh.cut.upper=0,
-											   apc.index=NULL,suppress.warning=FALSE)
-#	BN  29 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
-#					using apc.internal.function.date.2.character
-#	BN 7 jan 2016: warning modified	& add dim.names
-#	BN 14 may 2015: warning added
-#	BN 9 dec 2013
+apc.data.list.subset <- function (apc.data.list, age.cut.lower = 0, age.cut.upper = 0, 
+											     per.cut.lower = 0, per.cut.upper = 0,
+											     coh.cut.lower = 0, coh.cut.upper = 0,
+											     apc.index = NULL, suppress.warning = FALSE) 
+#	BN		24 apr 2017:	new code provided.
+#							Jonas Harnau found bug in old code
+#							& suggested completely new code
+#							This code is improved here. 
+#							The new code replaces code in version 1.3 from 1 Dec 2016 and earlier
 #	function to get subset of data set
 #	in:		apc.data.list
 #	out:	list 
@@ -350,15 +349,13 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 #						index.trap
 #						index.data
 #						per.zero
+#	note2: 	in code:
+#			.cut refers to subset in old coordinate system
+#			.new refers to subset in new coordinate system
 {	#	apc.data.list.subset
-	##############################
-	#	input
-	cut.old	<- c(age.cut.lower,age.cut.upper,per.cut.lower,per.cut.upper,coh.cut.lower,coh.cut.upper)
-	warning <- TRUE
 	######################
 	#	get index
-	if(is.null(apc.index)==TRUE)
-		apc.index	<- apc.get.index(apc.data.list)
+  	if(is.null(apc.index)) apc.index <- apc.get.index(apc.data.list)
 	##############################
 	#	get index values, that are used
 	age.max		<- apc.index$age.max				
@@ -375,113 +372,108 @@ apc.data.list.subset <- function(apc.data.list,age.cut.lower=0,age.cut.upper=0,
 	#	get data.list values, that are used
 	response	<- apc.data.list$response
 	dose		<- apc.data.list$dose
-	data.format	<- apc.data.list$data.format
 	##############################
-	#	check function
-	function.check	<- function()
-	{
-		check	<-1 
-		check	<- check*isTRUE(age.cut.lower>per.zero+per.cut.lower-coh.max+coh.cut.upper)
-		check	<- check*isTRUE(coh.cut.lower>per.zero+per.cut.lower-age.max+age.cut.upper)
-		check	<- check*isTRUE(age.cut.upper>=age.max-per.zero-per.max+per.cut.upper+coh.cut.lower)
-		check	<- check*isTRUE(coh.cut.upper>=coh.max-per.zero-per.max+per.cut.upper+age.cut.lower)
-		return(check)
-	}
-	check	<- function.check()	
-	while(check<1)	
-		repeat
-		{
-			if(age.cut.lower<=per.zero+per.cut.lower-coh.max+coh.cut.upper)
-				{ age.cut.lower <- age.cut.lower+1; check	<- function.check(); break}
-			if(coh.cut.lower<=per.zero+per.cut.lower-age.max+age.cut.upper)
-				{ coh.cut.lower <- coh.cut.lower+1; check	<- function.check(); break}
-			if(age.cut.upper< age.max-per.zero-per.max+per.cut.upper+coh.cut.lower)
-				{ age.cut.upper <- age.cut.upper+1; check	<- function.check(); break}
-			if(coh.cut.upper< coh.max-per.zero-per.max+per.cut.upper+age.cut.lower)
-				{ coh.cut.upper <- coh.cut.upper+1; check	<- function.check(); break}
-		}
-	cut.new	<- c(age.cut.lower,age.cut.upper,per.cut.lower,per.cut.upper,coh.cut.lower,coh.cut.upper)
-	if(sum(cut.old) != sum(cut.new) && warning && suppress.warning==FALSE)
-	{	cat("WARNING apc.data.list.subset:")
-		cat("cuts in argument are:\n")
-		print(cut.old)
-		cat("have been modified to:\n")
-		print(cut.new)		
-	}
-	if(age.max<=age.cut.lower+age.cut.upper+2)	check <- 11
-	if(per.max<=per.cut.lower+per.cut.upper+2)	check <- 12
-	if(coh.max<=coh.cut.lower+coh.cut.upper+2)	check <- 13
-	if(age.max<=age.cut.lower+age.cut.upper  )	check <- 21
-	if(per.max<=per.cut.lower+per.cut.upper  )	check <- 22
-	if(coh.max<=coh.cut.lower+coh.cut.upper  )	check <- 23
-	if(check > 20)
-	{	cat("ERROR apc.data.list.subset:\n")
-		if(check==21) cat("age.max<=age.cut.lower+age.cut.upper ... data set empty \n")
-		if(check==22) cat("per.max<=per.cut.lower+per.cut.upper ... data set empty \n")
-		if(check==23) cat("coh.max<=coh.cut.lower+coh.cut.upper ... data set empty \n")
-		return()
-	}
-	if(check > 1 && suppress.warning==FALSE)
-	{	cat("WARNING apc.data.list.subset:\n")
-		if(check==11) cat("age.max<=age.cut.lower+age.cut.upper+2 \n")
-		if(check==12) cat("per.max<=per.cut.lower+per.cut.upper+2 \n")
-		if(check==13) cat("coh.max<=coh.cut.lower+coh.cut.upper+2 \n")
-	}
+	#	warnings
+	if(age.cut.lower>age.max-3 & !suppress.warning)	warning("age.cut.lower >= age.dim-2")
+	if(per.cut.lower>per.max-3 & !suppress.warning)	warning("per.cut.lower >= per.dim-2")
+	if(coh.cut.lower>coh.max-3 & !suppress.warning)	warning("coh.cut.lower >= coh.dim-2")
+	if(age.cut.upper>age.max-3 & !suppress.warning)	warning("age.cut.upper >= age.dim-2")
+	if(per.cut.upper>per.max-3 & !suppress.warning)	warning("per.cut.upper >= per.dim-2")
+	if(coh.cut.upper>coh.max-3 & !suppress.warning)	warning("coh.cut.upper >= coh.dim-2")
 	##############################
-	#	get new indices
-	per.zero.adjust <- per.zero+per.cut.lower-age.cut.lower-coh.cut.lower
-	per.zero.new	<- max(per.zero.adjust,0)
-	age.max.new		<- age.max-age.cut.upper-age.cut.lower
-	coh.max.new		<- coh.max-coh.cut.upper-coh.cut.lower
-	per.max.new		<- per.max-per.cut.upper-per.cut.lower+min(per.zero.adjust,0)
-	age1.new		<- age1	+ age.cut.lower*unit
-	coh1.new		<- coh1	+ coh.cut.lower*unit
-	per1.new		<- per1 + (per.zero.new+age.cut.lower+coh.cut.lower-per.zero)*unit
+	#	errors
+	if(age.cut.lower>=age.max)	stop("age.cut.lower >= age.dim")
+	if(per.cut.lower>=per.max)	stop("per.cut.lower >= per.dim")
+	if(coh.cut.lower>=coh.max)	stop("coh.cut.lower >= coh.dim")
+	if(age.cut.upper>=age.max)	stop("age.cut.upper >= age.dim")
+	if(per.cut.upper>=per.max)	stop("per.cut.upper >= per.dim")
+	if(coh.cut.upper>=coh.max)	stop("coh.cut.upper >= coh.dim")
 	##############################
-	#	get trapezoid
-	trap.response		<- matrix(data=NA,nrow=age.max,ncol=coh.max)
-	trap.response.new	<- matrix(data=NA,nrow=age.max.new,ncol=coh.max.new)
-	trap.response[index.trap]	<- response[index.data]
-	for(age.new in 1:age.max.new)
-		for(coh.new in 1:coh.max.new)
-			if(age.new+coh.new>per.zero.new+1 && age.new+coh.new<per.zero.new+per.max.new+2)
-				trap.response.new[age.new,coh.new]	<- trap.response[age.new+age.cut.lower,coh.new+coh.cut.lower]
-	if(is.null(dose))	trap.dose.new <- NULL
-	else
-	{	trap.dose			<- matrix(data=NA,nrow=age.max,ncol=coh.max)
-		trap.dose.new		<- matrix(data=NA,nrow=age.max.new,ncol=coh.max.new)
-		trap.dose[index.trap]		<- dose[index.data]
-		for(age.new in 1:age.max.new)
-			for(coh.new in 1:coh.max.new)
-				if(age.new+coh.new>per.zero.new+1 && age.new+coh.new<per.zero.new+per.max.new+2)
-					trap.dose.new[age.new,coh.new]	<- trap.dose[age.new+age.cut.lower,coh.new+coh.cut.lower]
-	}				
+	#	paste per=age+coh-1 column onto index.trap
+	index.trap	<-	cbind(index.trap, apply(index.trap,1,sum)-1)
 	##############################
-	#	row & col names
-	if(age.max.new>1 && coh.max.new>1)
-	{	row.names	<- c(paste("age_",apc.internal.function.date.2.character(age1.new+seq(0,age.max.new-1)*unit),sep=""))
-		col.names	<- c(paste("coh_",apc.internal.function.date.2.character(coh1.new+seq(0,coh.max.new-1)*unit),sep=""))
-		rownames(trap.response.new) <- row.names
-		colnames(trap.response.new) <- col.names
-		if(is.null(dose)==FALSE)
-		{	rownames(trap.dose.new) 	<- row.names		
-			colnames(trap.dose.new) 	<- col.names
+	#	form binary vector with 1 if constraints are satisfied
+	select	<-	( index.trap[,1] >  age.cut.lower                    
+				& index.trap[,1] <= age.max - age.cut.upper
+				& index.trap[,2] >  coh.cut.lower                    
+				& index.trap[,2] <= coh.max - coh.cut.upper
+				& index.trap[,3] >  per.cut.lower + per.zero                    
+				& index.trap[,3] <= per.max - per.cut.upper	+ per.zero
+				)
+#  if(nrow(index.match.cut) == 0) stop("Cuts produce empty data set.", call. = TRUE)
+	##############################
+  	#	new definitions of parameters of index array
+	age.min.cut	<- min(index.trap[select,1])
+	per.min.cut	<- min(index.trap[select,3])
+	coh.min.cut	<- min(index.trap[select,2])
+	age.max.cut	<- max(index.trap[select,1]) #-age.min.cut+1
+	per.max.cut	<- max(index.trap[select,3]) #-per.min.cut+1
+	coh.max.cut	<- max(index.trap[select,2]) #-coh.min.cut+1
+	#	within new coordinate system
+	age.max.new	<- age.max.cut-age.min.cut+1	
+	per.max.new	<- per.max.cut-per.min.cut+1	
+	coh.max.new	<- coh.max.cut-coh.min.cut+1
+	per.zero.new<- max(0, per.min.cut -1 - age.min.cut - coh.min.cut + 2)
+	age1.new <-age1 + (age.min.cut -1) * unit
+   	per1.new <-per1 + (per.min.cut -1) * unit
+  	coh1.new <-coh1 + (coh.min.cut -1) * unit
+	##############################
+	#	adjust coordinates in index.trap
+	index.trap[,1]	<- index.trap[,1] - age.min.cut + 1
+	index.trap[,2]	<- index.trap[,2] - coh.min.cut + 1
+	##############################
+  	#	new data
+	response.new	<- matrix(NA,nrow=age.max.new,ncol=coh.max.new)
+	response.new[index.trap[select,c(1,2)]]	<- response[index.data[select,]]
+	if(!is.null(dose)){
+		dose.new	<- matrix(NA,nrow=age.max.new,ncol=coh.max.new)
+		dose.new[index.trap[select,c(1,2)]]	<- dose[index.data[select,]]
+	}	else dose.new = NULL
+	##############################
+	#	warnings
+	if(!suppress.warning){
+		#	subset becomes too small
+		cut.old	<- c(age.cut.lower,age.cut.upper,
+					 per.cut.lower,per.cut.upper,
+					 coh.cut.lower,coh.cut.upper)
+		cut.new <- c(age.min.cut-1,age.max-age.max.cut,
+					 per.min.cut-1-per.zero,per.max-per.max.cut+per.zero,
+					 coh.min.cut-1,coh.max-coh.max.cut)
+		if(sum(cut.new)>sum(cut.old)){
+#			print(sum(cut.old)>sum(pmax(0,cut.new)))
+			cat("WARNING apc.data.list.subset: ")
+			cat("cuts in arguments are:\n")
+			print(cut.old)
+			cat("have been modified to:\n")
+			print(cut.new)
 		}	
-	}	
+		#	data format is changed
+		data.format.list.warning <- c("AP", "CA", "CL", "CP", "PA", "PC")
+	  	if(apc.data.list$data.format %in% data.format.list.warning){
+			cat("WARNING apc.data.list.subset: ")
+			cat('coordinates changed to "AC" & data.format changed to "trapezoid"\n')
+		}	
+	}
 	##############################
-	#	warning if coordinate system changed
-	data.format.list.warning	<- c("AP","CA","CL","CP","PA","PC")	# 5 Jan 2016: deleted "trap","trapezoid"
-	if(data.format %in% data.format.list.warning && warning && suppress.warning==FALSE)
-		cat("WARNING apc.data.list.subset: coordinates changed to AC\n")
+	#	warnings
+	#	age.max.cut: largest age value
+	#	age.min.cut: smallest age value
+	if(age.max.cut-age.min.cut<=1 & !suppress.warning)	warning("age dimension <= 2")
+	if(per.max.cut-per.min.cut<=1 & !suppress.warning)	warning("per dimension <= 2")
+	if(coh.max.cut-coh.min.cut<=1 & !suppress.warning)	warning("coh dimension <= 2")
 	##############################
-	return(list(response	=trap.response.new	,
-				dose		=trap.dose.new		,
-				data.format	="trapezoid"		,	
-				age1		=age1.new			,
-				per1		=per1.new			,
-				coh1		=coh1.new			,
-				unit		=unit				,
-				per.zero	=per.zero.new		,
-				per.max		=per.max.new		,
-				time.adjust	=0					))		
+	return(list(response	=response.new				,
+				dose		=dose.new					,
+				data.format	="trapezoid"				,
+				age1		=age1.new					,
+				per1		=per1.new					,
+				coh1		=coh1.new					,
+				unit		=apc.data.list$unit			,
+				per.zero	=per.zero.new				,
+				per.max		=per.max.new				,
+				time.adjust	=apc.data.list$time.adjust	,
+				label		=apc.data.list$label		,
+				n.decimal	=apc.data.list$n.decimal	))
 }	#	apc.data.list.subset
+
+			

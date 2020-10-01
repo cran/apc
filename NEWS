@@ -1,7 +1,63 @@
 Package: apc
-Version: 1.3
-Date: 2016-11-17
+Version: 2.0.0
+Date: 2020-09-28
 
+--------------------------------------------------	
+
+CHANGES in version 2.0.0	2020-09-28
+Improvements
+	apc.indiv...			functions for cross sectional analysis updated
+							functions now accommodate panel data and data with survey weights
+	var.apc.plot.fit		subsumed into apc.plot.fit
+	var.apc.identify		subsumed into apc.identify
+	apc.plot.fit			options added	
+
+--------------------------------------------------	
+
+CHANGES in version 1.3.5	2019-11-21
+Improvements
+	is.triangle
+	triangle.cummulative
+	triangle.incremental	commands on triangular matrices using in chainladder data arrays
+
+--------------------------------------------------	
+
+CHANGES in version 1.3.4	2019-11-18
+Improvements
+	apc.forecast			added option for log normal forecasting in ac/chainladder data array
+
+--------------------------------------------------	
+
+CHANGES in version 1.3.3	2018-08-27
+Improvements
+	apc.indiv...			procedures for cross sectional analysis added
+
+--------------------------------------------------	
+
+CHANGES in version 1.3.2	2018-08-15
+Bugs
+	apc.fit.model			standard errors incorrect for odel.family="od.poisson.response","poisson.response"
+Improvements
+	apc.data.sums			added option of truncating incomplete sequences
+	apc.plot.data.sums		added option of reporting averages/sums
+							added option of truncating incomplete sequences
+Documentation
+	apc.fit.model			clearified that other identifications can be achieved by apc.identify
+
+--------------------------------------------------	
+
+CHANGES in version 1.3.1	2017-05-07
+Bugs
+	apc.data.list.subset	recoded. bug in coding of per.zero for AC arrays.
+	apc.identify			scaling by deviance added for model.family="od.poisson.response"
+							set sdv=NA not sdv=0 for intercept for model.family="od.poisson.response","poisson.response"
+							changed apc.plot.fit accordingly
+Improvements
+	apc.plot.data.sparsity	additional option swap.axes
+	apc.plot.fit			options to include/exclude plots of linear plane and double differences
+Documentation
+	apc.data.list			default value for age1,per1,coh1 clearified
+	apc.plot.fit			default value for main.sub clearified
 --------------------------------------------------	
 
 CHANGES in version 1.3

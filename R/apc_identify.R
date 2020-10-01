@@ -1,9 +1,10 @@
 #######################################################
 #	apc package
-#	Bent Nielsen, 3 April 2015, version 1.1
+#	Bent Nielsen, 28 September 2020, version 2.0.0
+#	Bent Nielsen, 7 May 2017, version 1.3.1
 #	functions to identify parameters
 #######################################################
-#	Copyright 2014,2015 Bent Nielsen
+#	Copyright 2014-2017 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -25,8 +26,11 @@
 #	apc.identify
 #########################################################
 apc.identify	<- function(apc.fit.model)
-#	BN  2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
-#					using apc.internal.function.date.2.character
+#	BN/ZF  20 sep 2020	Subsumed var.apc.identify for apc.indiv
+#	BN		7 may 2017	Changed: covariance for OD.Poisson scaled correctly
+#	BN  	2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
+#						using apc.internal.function.date.2.character
+#	Note: 	could lack of intercept be treated the same way for mixed parametrization and within panels? 
 #	3 Mar 2015
 #	In:		apc.fit.model			list		from apc.fit.model
 #	Out:	index.age.max	 		vector. 	Indices for identified age parameters 
@@ -42,7 +46,7 @@ apc.identify	<- function(apc.fit.model)
 {	#	function.apc.identify.double.sums
 	##############################
 	#	create indicator for mixed parametrisation
-	mixed.par	<- isTRUE(apc.fit.model$model.family %in% c("poisson.response"))
+	mixed.par	<- isTRUE(apc.fit.model$model.family %in% c("poisson.response","od.poisson.response"))
 	##############################
 	#	model design list
 	model.design.list.sub	<- c("AP","AC","PC") #,"Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
@@ -50,6 +54,7 @@ apc.identify	<- function(apc.fit.model)
 	#	get values
 	coefficients	<- apc.fit.model$coefficients.canonical	#	4 columns
 	covariance		<- apc.fit.model$covariance.canonical
+	intercept		<- apc.fit.model$intercept			# BN 250920 added to match apc.indiv
 	slopes			<- apc.fit.model$slopes
 	difdif			<- apc.fit.model$difdif
 	dates			<- apc.fit.model$dates
@@ -67,11 +72,25 @@ apc.identify	<- function(apc.fit.model)
 	per.max			<- apc.fit.model$per.max
 	coh.max			<- apc.fit.model$coh.max
 	model.design	<- apc.fit.model$model.design
+	model.family	<- apc.fit.model$model.family
 	n.decimal		<- apc.fit.model$n.decimal
+	df.residual		<- apc.fit.model$df.residual
+	deviance		<- apc.fit.model$deviance
+	##############################
+	#	BN/ZF 25/09/20
+	#	This is to be able subsume old apc.identify for aggregate data
+	#	and ZFs var.apc.identify
+	#	Check if individual or aggregate model
+	if(is.null(intercept))
+	{
+		is.indiv	<- FALSE
+		intercept	<- TRUE
+	}
+	else is.indiv	<- TRUE
 	##############################
 	#	derived values
-	det.max	<- 1+sum(slopes)
-	det.sub	<- 1+sum(slopes)-sum(difdif)
+	det.max	<- intercept+sum(slopes)				# BN/ZF 250920 intercept instead of 1
+	det.sub	<- intercept+sum(slopes)-sum(difdif)	# BN/ZF 250920 intercept instead of 1
 	xi.max	<- det.max+difdif[1]*age.max+difdif[2]*per.max+difdif[3]*coh.max
 	xi.sub	<- det.sub+difdif[1]*age.max+difdif[2]*per.max+difdif[3]*coh.max
 	xi.dif	<- det.sub+difdif[1]*(age.max-1)+difdif[2]*(per.max-1)+difdif[3]*(coh.max-1)
@@ -90,7 +109,7 @@ apc.identify	<- function(apc.fit.model)
 	index.age.sub	<- NULL
 	index.per.sub	<- NULL
 	index.coh.sub	<- NULL
-	if(model.design != "APC")
+	if(!(model.design %in% c("APC","FAP")))		# BN/ZF 250920 exclude FAP
 	{
 		start		<- det.sub
 		if(difdif[1])	{	index.age.sub	<- start+seq(1,age.max);	start	<- start+age.max	}
@@ -101,7 +120,7 @@ apc.identify	<- function(apc.fit.model)
 	index.age.dif	<- NULL
 	index.per.dif	<- NULL
 	index.coh.dif	<- NULL
-	if(model.design != "APC")
+	if(!(model.design %in% c("APC","FAP")))		# BN/ZF 250920 exclude FAP
 	{
 		start		<- det.sub
 		if(difdif[1])	{	index.age.dif	<- start+seq(1,age.max-1);	start	<- start+age.max-1	}
@@ -117,7 +136,7 @@ apc.identify	<- function(apc.fit.model)
 	if(difdif[3])	dates.max[index.coh.max,1]	<- coh1+seq(0,coh.max-1)*unit
 	#	then for use with in reparametrised submodels of sums of differences 
 	dates.sub		<- NULL
-	if(model.design != "APC")
+	if(!(model.design %in% c("APC","FAP")))		# BN/ZF 250920 exclude FAP
 	{
 		dates.sub		<- matrix(data=NA,nrow=xi.sub,ncol=1)
 		if(difdif[1])	dates.sub[index.age.sub,1]	<- age1+seq(0,age.max-1)*unit	
@@ -126,7 +145,7 @@ apc.identify	<- function(apc.fit.model)
 	}	
 	#	then for use with in reparametrised submodels of sums of differences 
 	dates.dif		<- NULL
-	if(model.design != "APC")
+	if(!(model.design %in% c("APC","FAP")))		# BN/ZF 250920 exclude FAP
 	{
 		dates.dif		<- matrix(data=NA,nrow=xi.dif,ncol=1)
 		if(difdif[1])	dates.dif[index.age.dif,1]	<- age1+seq(1,age.max-1)*unit	
@@ -194,34 +213,101 @@ apc.identify	<- function(apc.fit.model)
 	}	#	function.detrend
 	#	declare linear transformation matrix
 	m.detrend	<-	diag(xi.max)
-	#	move anchoring of linear trend from U to 1.
-	if(sum(slopes)==2)
-		m.detrend[1,2:3]	<- 1-U
-	if(sum(slopes)==1 && !slopes[2])
-		m.detrend[1,2]		<- 1-U
-	#	detrend age effects, move linear trend to deterministics
-	if(difdif[1])
-	{	m.detrend[1,index.age.max[1]]	<- 1
-		m.detrend[2,index.age.max[c(1,age.max)]]	<- c(-1,1)/(age.max-1)
-		m.detrend[index.age.max,index.age.max]	<- function.detrend(age.max)		
-	}
-	if(difdif[3])
-	{	# there are 2 slopes if slopes=c(1,0,1)
-		# there is  1 slope  if slopes=c(0,0,1)
-		# recall det.max <- 1+sum(slopes)
-		m.detrend[1,index.coh.max[1]]	<- 1
-		m.detrend[det.max,index.coh.max[c(1,coh.max)]]	<- c(-1,1)/(coh.max-1)
-		m.detrend[index.coh.max,index.coh.max]	<- function.detrend(coh.max)		
-	}
-	if(difdif[2])
-	{	# if slopes=c(1,0,1) the period slope gives age & cohort slopes with equal weight
-		# if slopes=c(0,1,0) the period slope gives a period     slope
-		if(!slopes[2])  m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)+c(1,-1)*per.zero/(per.max-1)
-		if(slopes[2]) 	m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)
-		if(slopes[1])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
-		if(slopes[2])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
-		if(slopes[3])	m.detrend[3,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
-		m.detrend[index.per.max,index.per.max]	<- function.detrend(per.max)		
+	##############################
+	#	BN 250920
+	#	definition of detrending for aggregate models
+	if(!is.indiv)
+	{	
+		#	move anchoring of linear trend from U to 1.
+		if(sum(slopes)==2)
+			m.detrend[1,2:3]	<- 1-U
+		if(sum(slopes)==1 && !slopes[2])
+			m.detrend[1,2]		<- 1-U
+		#	detrend age effects, move linear trend to deterministics
+		if(difdif[1])
+		{	m.detrend[1,index.age.max[1]]	<- 1
+			m.detrend[2,index.age.max[c(1,age.max)]]	<- c(-1,1)/(age.max-1)
+			m.detrend[index.age.max,index.age.max]	<- function.detrend(age.max)		
+		}
+		if(difdif[3])
+		{	# there are 2 slopes if slopes=c(1,0,1)
+			# there is  1 slope  if slopes=c(0,0,1)
+			# recall det.max <- 1+sum(slopes)
+			m.detrend[1,index.coh.max[1]]	<- 1
+			m.detrend[det.max,index.coh.max[c(1,coh.max)]]	<- c(-1,1)/(coh.max-1)
+			m.detrend[index.coh.max,index.coh.max]	<- function.detrend(coh.max)		
+		}
+		if(difdif[2])
+		{	# if slopes=c(1,0,1) the period slope gives age & cohort slopes with equal weight
+			# if slopes=c(0,1,0) the period slope gives a period     slope
+			if(!slopes[2])  m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)+c(1,-1)*per.zero/(per.max-1)
+			if(slopes[2]) 	m.detrend[1,index.per.max[c(1,per.max)]] <- c(1,0)
+			if(slopes[1])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+			if(slopes[2])	m.detrend[2,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+			if(slopes[3])	m.detrend[3,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+			m.detrend[index.per.max,index.per.max]	<- function.detrend(per.max)		
+		}
+		linplane <- NULL
+	}	
+	##############################
+	#	ZF 250920
+	#	definition of detrending for individual models
+	if(is.indiv)
+	{
+		# which linear plane elements are present?
+  		v_o <- NULL
+  		v_a <- NULL
+  		v_c <- NULL
+  		v_p <- NULL
+  		# get m.detrend row values based on what is present (linear plane only)
+  		if( intercept &  slopes[1] &  slopes[3]) {v_o <- 1; v_a <- 2; v_c <- 3}
+  		if( intercept &  slopes[1] & !slopes[3]) {v_o <- 1; v_a <- 2}
+  		if( intercept & !slopes[1] &  slopes[3]) {v_o <- 1; v_c <- 2}
+  		if( intercept & !slopes[1] & !slopes[3]) {v_o <- 1}
+  		if(!intercept &  slopes[1] &  slopes[3]) {v_a <- 1; v_c <- 2}
+  		if(!intercept &  slopes[1] & !slopes[3]) {v_a <- 1}
+  		if(!intercept & !slopes[1] &  slopes[3]) {v_c <- 1}
+  		if( intercept &  slopes[2])              {v_o <- 1; v_p <- 2}
+  		if(!intercept &  slopes[2])              {v_p <- 1}
+  		linplane <- list(v_o, v_a, v_c, v_p)
+  		# construct m.detrend columns using allocated row values
+  		# cf. Nielsen 2015 R Journal paper
+  		# construct detrended intercept
+  		if(!is.null(v_o))
+		{
+    		if(sum(slopes)==2) 
+     	 		m.detrend[v_o,intercept + 1:2]	<- 1-U
+    		if(sum(slopes)==1 && !slopes[2]) 
+      			m.detrend[v_o,intercept + 1]	<- 1-U
+    		if(difdif[1])
+      			m.detrend[v_o,index.age.max[1]]	<- 1
+    		if(difdif[3])
+      			m.detrend[v_o,index.coh.max[1]]	<- 1
+    		if(difdif[2])
+			{
+      			if(!slopes[2]) m.detrend[v_o,index.per.max[c(1,per.max)]] <- c(1,0)+c(1,-1)*per.zero/(per.max-1)
+      			if(slopes[2])  m.detrend[v_o,index.per.max[c(1,per.max)]] <- c(1,0)
+    		}
+  		}
+  		# construct detrended slopes
+  		if(!is.null(v_a))
+		{
+    		if(difdif[1]) m.detrend[v_a,index.age.max[c(1,age.max)]]	<- c(-1,1)/(age.max-1)
+    		if(difdif[2]) m.detrend[v_a,index.per.max[c(1,per.max)]]  	<- c(-1,1)/(per.max-1)
+  		}
+  		if(!is.null(v_c))
+		{
+    		if(difdif[3]) m.detrend[v_c,index.coh.max[c(1,coh.max)]]	<- c(-1,1)/(coh.max-1)
+    		if(difdif[2]) m.detrend[v_c,index.per.max[c(1,per.max)]]  	<- c(-1,1)/(per.max-1)
+  		}
+  		if(!is.null(v_p))
+		{
+    		if(difdif[2]) m.detrend[v_p,index.per.max[c(1,per.max)]]  <- c(-1,1)/(per.max-1)
+  		}
+  		# construct detrended cumulated double differences
+  		if(difdif[1]) m.detrend[index.age.max,index.age.max]	<- function.detrend(age.max)
+  		if(difdif[3]) m.detrend[index.coh.max,index.coh.max]	<- function.detrend(coh.max)
+  		if(difdif[2]) m.detrend[index.per.max,index.per.max]	<- function.detrend(per.max)
 	}
 	##############################	
 	##############################
@@ -231,9 +317,14 @@ apc.identify	<- function(apc.fit.model)
 	coefficients.ssdd		<- m.ssdd 		%*% coefficients
 	coefficients.detrend	<- m.detrend 	%*% coefficients.ssdd
 	##############################
-	#	construct row names 
-	names.ssdd		<- c("level")
-	names.detrend	<- c("level")
+	#	construct row names
+  	names.ssdd		<- vector("character")				# ZF 290220 accommodate absence of intercept
+  	names.detrend	<- vector("character")				#
+  	if(intercept==TRUE) 								#
+  	{													#
+		names.ssdd    <- c(names.ssdd,    "level")		#
+    	names.detrend <- c(names.detrend, "level")		#
+  	}													# ZF 290220 accommodate absence of intercept
 	if(slopes[1])	{	names.ssdd		<- c(names.ssdd	  ,"age slope")
 						names.detrend	<- c(names.detrend,"age slope")		}		
 	if(slopes[2])	{	names.ssdd		<- c(names.ssdd	  ,"period slope")
@@ -263,17 +354,25 @@ apc.identify	<- function(apc.fit.model)
 		}
 	covariance.ssdd		<- m.ssdd 	%*% covariance 			%*% t(m.ssdd   )
 	covariance.detrend	<- m.detrend%*% covariance.ssdd 	%*% t(m.detrend)
+	#	adjust if overdispersed poisson, BN 27 april 2017
+	if(model.family=="od.poisson.response"){
+		covariance.ssdd		<- covariance.ssdd 		* deviance/df.residual
+		covariance.detrend	<- covariance.detrend 	* deviance/df.residual
+	}
 	##############################
 	#	get standard errors 
 	coefficients.ssdd[,2]		<- sqrt(diag(covariance.ssdd   ))
 	coefficients.detrend[,2]	<- sqrt(diag(covariance.detrend))
 	#	set NA for ad hoc identified entries
-	if(difdif[1])	coefficients.ssdd[   index.age.max,2][U:(U+1)]	<- NA
+	if(difdif[1])	coefficients.ssdd[   index.age.max,2][U:(U+1)]					<- NA
 	if(difdif[2])	coefficients.ssdd[   index.per.max,2][(per.odd+1):(per.odd+2)]	<- NA
-	if(difdif[3])	coefficients.ssdd[   index.coh.max,2][U:(U+1)]	<- NA
-	if(difdif[1])	coefficients.detrend[index.age.max,2][c(1,age.max)]	<- NA                           
-	if(difdif[2])	coefficients.detrend[index.per.max,2][c(1,per.max)]	<- NA   
-	if(difdif[3])	coefficients.detrend[index.coh.max,2][c(1,coh.max)]	<- NA                           
+	if(difdif[3])	coefficients.ssdd[   index.coh.max,2][U:(U+1)]					<- NA
+	if(difdif[1])	coefficients.detrend[index.age.max,2][c(1,age.max)]				<- NA
+	if(difdif[2])	coefficients.detrend[index.per.max,2][c(1,per.max)]				<- NA
+	if(difdif[3])	coefficients.detrend[index.coh.max,2][c(1,coh.max)]				<- NA
+	#	BN 2 May 2017: set NA for intercept for mixed parametrisation
+	if(mixed.par)	coefficients.ssdd[	 1,2]	<- NA
+	if(mixed.par)	coefficients.detrend[1,2]	<- NA
 	######################
 	#	get t-statistics & p-values
 	function.get.t_and_p	<- function(coefficients)
@@ -333,8 +432,8 @@ apc.identify	<- function(apc.fit.model)
 			return(m[2:n,1:n])
 		}	#	function.dif
 		#	declare transformation
-		m.dif		<- NULL
-		m.dif			<- matrix(data=0,nrow=xi.dif,ncol=xi.sub)
+		m.dif	<- NULL
+		m.dif	<- matrix(data=0,nrow=xi.dif,ncol=xi.sub)
 		m.dif[1:det.sub,1:det.sub]			<- diag(det.sub)
 		m.dif[index.age.dif,index.age.sub]	<- function.dif(age.max)
 		m.dif[index.per.dif,index.per.sub]	<- function.dif(per.max)
@@ -385,6 +484,9 @@ apc.identify	<- function(apc.fit.model)
 		if(difdif[3])	coefficients.demean[ index.coh.sub,2][1]	<- NA
 		coefficients.demean 	<- function.get.t_and_p(coefficients.demean )
 		coefficients.dif    	<- function.get.t_and_p(coefficients.dif    )
+		#	BN 7 May 2017: set NA for intercept for mixed parametrisation
+		if(mixed.par)	coefficients.demean[1,2]	<- NA
+		if(mixed.par)	coefficients.dif[  1,2]	<- NA
 	}	
 	##############################
 	return(list(index.age.max	 		= index.age.max    		,
@@ -406,7 +508,8 @@ apc.identify	<- function(apc.fit.model)
 				coefficients.demean		= coefficients.demean	,
 				covariance.demean	 	= covariance.demean		,
 				coefficients.dif		= coefficients.dif		,
-				covariance.dif			= covariance.dif		 
+				covariance.dif			= covariance.dif		,
+				linplane				= linplane
 		))
 }	#	apc.identify
 

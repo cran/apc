@@ -155,6 +155,37 @@ apc.data.list	<- function(response, data.format, dose=NULL, age1=NULL, per1=NULL
 				n.decimal	=n.decimal	))
 }	#	apc.data.list
 
+is.triangle	<- function(m)
+#	BN 21 Nov 2019
+#	checks if input is a matrix with "CL" form.
+#	in:	m			matrix with "CL" format Dimension kxk.
+#					Upper left triangle filled by v, row by row.
+#					Remaining entries NA
+#					in incremental form
+{	#	is.triangle
+	answer	<- TRUE
+	if(!is.matrix(m))
+	{	answer	<- FALSE
+		warning("argument is not a matrix")	}
+	if(answer==TRUE)	
+	if(!(nrow(m)==ncol(m)))
+	{	answer	<- FALSE
+		warning("argument is not a square matrix")	}
+	if(answer==TRUE)	
+	for(row in 1:nrow(m))
+		for(col in 1:(nrow(m)-row+1))
+			if(is.na(m[row,col]))
+			{	answer	<- FALSE
+				warning("na.s in upper triangle") }
+	if(answer==TRUE)	
+	for(row in 2:nrow(m))
+		for(col in (nrow(m)-row+2))
+			if(!is.na(m[row,col]))
+			{	answer	<- FALSE
+				warning("numbers in lower triangle") }
+	return(answer)
+}	#	is.triangle
+
 vector.2.triangle	<- function(v,k)
 #	BN 7 Feb 2015
 #	function to organise a vector as a triangle.
@@ -180,3 +211,54 @@ vector.2.triangle	<- function(v,k)
 	}
 	return(m)
 }	#	vector.2.triangle	
+
+triangle.cumulative	<- function(m)
+#	BN 21 Nov 2019
+#	cumulates an incremental triangle
+#	in:	m			apc.data.list
+#					OR
+#					matrix with "CL" format Dimension kxk.
+#					Upper left triangle filled by v, row by row.
+#					Remaining entries NA
+#					in incremental form
+#	out: m.cum	 	matrix in "CL" format, cumulated
+{	#	triangle.cumulative
+	##############################
+	#	extract response matrix if input is an apc.data.list
+	m.m	<- m				
+	if(is.list(m))	m.m 	<- m$response				
+	##############################
+	#	Check input
+	if(!is.triangle(m.m))			warning("m is not a triangle matrix, tries anyway...")
+	##############################
+	m.cum	<- m.m
+	for(col in 2:ncol(m.cum))
+		m.cum[,col]	<- m.cum[,(col-1)] + m.cum[,col]
+	return(m.cum)	
+}	#	triangle.cumulative
+
+triangle.incremental	<- function(m)
+#	BN 21 Nov 2019
+#	find increments of cumulative triangle
+#	in:	m			apc.data.list
+#					OR
+#					matrix with "CL" format Dimension kxk.
+#					Upper left triangle filled by v, row by row.
+#					Remaining entries NA
+#					in incremental form
+#	out: m.cum	 	matrix in "CL" format, incremental
+{	#	triangle.incremental
+	##############################
+	#	extract response matrix if input is an apc.data.list
+	m.m	<- m				
+	if(is.list(m))	m.m 	<- m$response				
+	##############################
+	#	Check input
+	if(!is.triangle(m.m))			warning("m is not a triangle matrix, tries anyway...")
+	##############################
+	m.inc	<- m.m
+	for(col in ncol(m.inc):2)
+		m.inc[,col]	<- m.inc[,col] - m.inc[,(col-1)]
+	return(m.inc)	
+}	#	triangle.incremental
+

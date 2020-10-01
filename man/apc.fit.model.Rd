@@ -7,7 +7,8 @@
 The model is parametrised in terms of the canonical parameter introduced by Kuang, Nielsen and Nielsen (2008),
 see also the implementation in Martinez Miranda, Nielsen and Nielsen (2015).
 This parametrisation has a number of advantages: it is freely varying, it is the canonical parameter of a
-regular exponential family, and it is invariant to extentions of the data matrix. 
+regular exponential family, and it is invariant to extentions of the data matrix.
+Other parametrizations can be computed using \code{apc.identify}.
 
 \code{apc.fit.model} can be be used for all three age period cohort factors, or for submodels with fewer of these factors. 
 
@@ -18,8 +19,10 @@ The GLM families include Poisson regressions (with log link) and Normal/Gaussian
 apc.fit.table produces a deviance table for 15 combinations of the three factors and linear trends:
 "APC", "AP", "AC", "PC", "Ad", "Pd", "Cd", "A", "P", "C", "t", "tA", "tP", "tC", "1".
 }
-\usage{apc.fit.model(apc.data.list,model.family,model.design,apc.index=NULL)
-apc.fit.table(apc.data.list,model.family,model.design.reference="APC",apc.index=NULL)}
+\usage{	apc.fit.model(apc.data.list,model.family,model.design,apc.index=NULL,
+			replicate.version.1.3.1=FALSE)
+		apc.fit.table(apc.data.list,model.family,model.design.reference="APC",
+			apc.index=NULL)}
 \arguments{
   	\item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
   	\item{model.family}{Character.  The following options are implemented.	These are used internally when
@@ -41,6 +44,8 @@ apc.fit.table(apc.data.list,model.family,model.design.reference="APC",apc.index=
 				as response/dose.}
 			\item{"gaussian.response"}{This sets family=gaussian(link="identity").  Only responses are used.
 				The dependent variable is the responses.}
+			\item{"log.normal.rates"}{Gaussian regression for log(rates) and with identity link (Least Squares).}	
+			\item{"log.normal.response"}{Gaussian regression for log(response) and with identity link (Least Squares).}	
 		}}
   \item{model.design}{Character.  This indicates the design choice.  The following options are possible.
 	  	\describe{
@@ -66,6 +71,8 @@ apc.fit.table(apc.data.list,model.family,model.design.reference="APC",apc.index=
 			If not provided this is computed internally.
 			If \code{apc.fit.model} is used in a simulation study computational effort can be saved when
 			using this option.}
+	\item{replicate.version.1.3.1}{\emph{Optional}. Logical. Replicate error in covariance calculation for 
+			"poisson.response","od.poisson.response" in versions 1.2.3-1.3.1. Default=FALSE}		
 }
 \value{
 	\emph{apc.fit.table}
@@ -103,7 +110,8 @@ apc.fit.table(apc.data.list,model.family,model.design.reference="APC",apc.index=
 	\item{fit}{List. Values from \code{\link{glm.fit}}.}
 	\item{apc.index}{List. Values from \code{\link{apc.get.index}}.}	  
 	\item{coefficients.canonical}{Matrix.  For each coordinate of the canonical parameters is reported coefficient, standard deviation, z-value, which is the ratio of those, and asymptotically normal p-values.
-									Note, for "od.poisson.response" the reported standard errors corrected by the deviance and p-values are asymptotically t distributed, see Harnau and Nielsen (2016).}
+									Note, for "od.poisson.response" the reported standard errors corrected by the deviance and p-values are asymptotically t distributed, see Harnau and Nielsen (2016).
+									Other parametrizations can be computed using \code{apc.identify}.}
 	\item{covariance.canonical	}{Matrix.  Estimated covariance matrix for canonical parameters.}
 	\item{slopes				}{Vector.  Length three.  The design matrix found by \code{\link{apc.get.design.collinear}} has age, period, and cohort linear trends. \code{slopes} indicates which of these are actually used in estimation.}
 	\item{difdif				}{Vector.  Length three.  The design matrix found by \code{\link{apc.get.design.collinear}} has age, period, and cohort double differences. \code{slopes} indicates which of these are actually used in estimation.}
@@ -131,7 +139,10 @@ For the \code{poisson.response} the inference is conditional on the level, see M
 The \code{coefficients.canonical} computed by \code{apc} are therefore different from the default \code{coefficients} computed by \code{glm}.
 
 For the \code{od.poisson.response} an asymptotic theory is used that mimics the conditioning for \code{poisson.response}.
-The asymptotic distribution are, however, asymptotically t or F distributed, see Harnau and Nielsen (2016).
+The asymptotic distribution are, however, asymptotically t or F distributed, see Harnau and Nielsen (2017).
+
+For the \code{log.normal.response} standard normal theory applies for quantities on the log scale including estimators.
+An asymptotic theory for quantities on the original scale is provided in Kuang and Nielsen (2018). 
 
 For \code{coefficients} the 3rd and 4th columns have headings \code{t value} and \code{Pr(>|t|)} for \code{od.poisson.response}
 to indicate an asymptotic t theory
@@ -139,13 +150,15 @@ and otherwise
 \code{z value} and \code{Pr(>|z|)} to indicate an asymptotic normal theory. The labels are inherited from \code{\link{glm.fit}}.
 }
 \references{
-Harnau, J. and Nielsen, B. (2016) Asymptotic theory for over-dispersed age-period-cohort and extended chain ladder models. Mimeo.
+Harnau, J. and Nielsen (2016) Over-dispersed age-period-cohort models. To appear in \emph{Journal of the American Statistical Association}. \emph{Download}: \href{https://www.nuffield.ox.ac.uk/economics/papers/2017/HarnauNielsen2017apcDP.pdf}{Nuffield DP}
 
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D, Nielsen B (2018) Generalized log-normal chain-ladder. mimeo Nuffield Collge.
 
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55; \emph{Download}: Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{https://doi.org/10.1111/rssa.12051}{Article}, \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 26 Oct 2016 (27 Aug 2014)}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Aug 2018 (27 Aug 2014)}
 \seealso{
 The fit is done using \code{\link{glm.fit}}.
 

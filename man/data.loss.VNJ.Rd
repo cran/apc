@@ -2,7 +2,7 @@
 \alias{data.loss.VNJ}
 \title{Motor data}
 \description{
-Function that organises morot data in \code{\link{apc.data.list}} format.
+Function that organises motor data in \code{\link{apc.data.list}} format.
 
 The data set is taken from tables 1,2 of Verrall, Nielsen and Jessen (2010).
 Data from Codan, Danish subsiduary of Royal & Sun Alliance.

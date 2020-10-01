@@ -2,12 +2,15 @@
 \alias{apc.data.sums}
 \title{Computes age, period and cohort sums of a matrix}
 \description{Computes age, period and cohort sums of a matrix. This is the same as taking column, row and diagonal sums. The match between the age, period and cohort sums and column, row and diagonal sums depends on the data format}
-\usage{apc.data.sums(apc.data.list,data.type="r",average=FALSE,apc.index=NULL)}
+\usage{apc.data.sums(apc.data.list,data.type="r",
+			average=FALSE,keep.incomplete=TRUE,apc.index=NULL)}
 \arguments{
-  \item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
-  \item{data.type}{Optional. Character. "r","d","m" if sums are computed for responses,dose,(mortality) rates.  Rates are computed as responses/doses. "r" is default.} 
-  \item{average}{Optional.  Logical. If TRUE/FALSE reports averages/sums. Default is FALSE.}
-  \item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
+  	\item{apc.data.list}{List. See \code{\link{apc.data.list}} for a description of the format.}
+  	\item{data.type}{Optional. Character. "r","d","m" if sums are computed for responses,dose,(mortality) rates.  Rates are computed as responses/doses. "r" is default.} 
+  	\item{average}{Optional.  Logical. If TRUE/FALSE reports averages/sums. Default is FALSE.}
+  	\item{keep.incomplete}{Optional. Logical. If true perform calculation for incomplete sequences by removing NA.
+  			If false incomplete sequences are NA.  See example. Default=TRUE.}
+ 	\item{apc.index}{Optional. List. See \code{\link{apc.get.index}} for a description of the format.  If not provided this is computed.}
 }
 \section{Arguments: Notes}{
 If apc.index is supplied then the input can be simplified.
@@ -22,11 +25,11 @@ Likewise \code{apc.index} does not need to be a full \code{apc.index list}. It s
 \code{per.zero}.                                                        
 }
 \value{
-  \item{sums.age}{Vector. Sums over data.matrix by age.}
-  \item{sums.per}{Vector. Sums over data.matrix by period.}
-  \item{sums.coh}{Vector. Sums over data.matrix by cohort.}
+  \item{sums.age}{Vector. Sums/Averages over data.matrix by age.}
+  \item{sums.per}{Vector. Sums/Averages over data.matrix by period.}
+  \item{sums.coh}{Vector. Sums/Averages over data.matrix by cohort.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Dec 2013 updated 17 Nov 2016}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 15 Aug 2018 (15 Dec 2013)}
 \seealso{The example below uses Japanese breast cancer data, see \code{\link{data.Japanese.breast.cancer}}}
 \examples{
 #####################
@@ -44,6 +47,22 @@ apc.data.sums(data.list)
 #	[1]  6 15 24 33
 #	$sums.coh
 #	[1]  3  8 15 24 18 10
+
+apc.data.sums(data.list,average=TRUE)
+#	$sums.age
+#	[1] 5.5 6.5 7.5
+#	$sums.per
+#	[1]  2  5  8 11
+#	$sums.coh
+#	[1]  3  4  5  8  9 10
+
+apc.data.sums(data.list,keep.incomplete=FALSE)
+#	$sums.age
+#	 [1] 22 26 30
+#	$sums.per
+#	[1]  6 15 24 33
+#	$sums.coh
+#	[1]  NA NA 15 24 NA NA
 
 #####################
 #	EXAMPLE with Japanese breast cancer data

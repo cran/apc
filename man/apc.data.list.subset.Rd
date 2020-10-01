@@ -53,7 +53,7 @@ Likewise \code{apc.index} does not need to be a full \code{apc.index list}. It s
 		\item{per.zero}{Numeric.}
 		\item{per.max}{Numeric.}
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 4 Dec 2013 updated 6 Mar 2016}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 4 Dec 2013 recoded 26 Apr 2017}
 \seealso{The below example uses artificial data.  For an example using
 \code{\link{data.asbestos}}
 see 

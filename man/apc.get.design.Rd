@@ -55,11 +55,17 @@ apc.get.design.collinear(apc.index)}
 	two of these should be used.  They are selected by \code{slopes}.
 }
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models.
 }
-\seealso{The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/NewDesign.pdf}{NewDesign.pdf}.}
+\seealso{
+The vignette
+	\href{../doc/NewDesign.pdf}{\code{NewDesign.pdf}},
+	\href{../doc/NewDesign.R}{\code{NewDesign.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}.		
+}
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 1 Mar 2015}
 \examples{
 #####################

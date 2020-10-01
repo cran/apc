@@ -59,18 +59,37 @@ These can be found using
 }
 \usage{apc.plot.fit(apc.fit.model,scale=FALSE,
 					sdv.at.zero=TRUE,type="detrend",
+					include.linear.plane=TRUE,
+					include.double.differences=TRUE,
 					sub.plot=NULL,main.outer=NULL,main.sub=NULL,
-					cex=NULL,cex.axis=NULL)}
+					cex=NULL,cex.axis=NULL,cex.lab=NULL,cex.main=NULL,
+					cex.main.outer=1.2,
+					line.main=0.5,line.main.outer=NULL,
+					las=NULL,mar=NULL,oma=NULL,mgp=c(2,1,0),
+					vec.xlab=NULL)
+}					
 \arguments{
   \item{apc.fit.model}{List. See \code{\link{apc.fit.model}} for a description of the format.}
   \item{scale}{Optional. Logical. If (TRUE) FALSE use scale of (inverse) link function.  Default is FALSE.}
   \item{sdv.at.zero}{Optional. Logical. If FALSE/TRUE standard deviations are plotted around estimates/zero.  Default is TRUE.}
   \item{type}{Optional.  Character.  If "detrend" double sums start and end in zero.  If "sum.sum" double sums anchored as discussed in Nielsen (??). Default is "detrend".}
+  \item{include.linear.plane}{Optional. Logical. If true include plots of linear plane. Default TRUE}
+  \item{include.double.differences}{Optional. Logical. If true include plots of double differences. Default TRUE}
   \item{sub.plot}{Optional.  Character: "a","b",...,"i".  Only the indicated sub plot is plotted. Default is NULL so all plots shown.}
   \item{main.outer}{Optional.  Character.  Main title in outer margin.  Default is generated internally.}
-  \item{main.sub}{Optional.  Vector of 9 characters.  Main titles for individual plots. Default is generated internally.}
-  \item{cex}{Optional.  Plot parameter, see \code{\link{par}}. Controls size of text. Default is 1.}
-  \item{cex.axis}{Optional.  Plot parameter, see \code{\link{par}}. Controls size of axis annotations. Default is 1.}
+  \item{main.sub}{Optional.  Vector of 9 characters.  Main titles for individual plots. Default is generated internally, see note 3 below.}
+  \item{cex}{Optional.  Plot parameter, see \code{\link{par}}. Controls size of text. Default is NULL so that R default is used.}
+  \item{cex.axis}{Optional.  Plot parameter, see \code{\link{par}}. Controls magnification of axis annotations. Default is NULL so that R default is used.}
+  \item{cex.lab}{Optional.	Plot parameter, see \code{\link{par}}. Controls magnification of axis labels. Default is NULL so that R default is used.}
+  \item{cex.main}{Optional.  Plot parameter, see \code{\link{par}}. Controls magnification of main title. Default is NULL so that R default is used.}
+  \item{cex.main.outer}{Optional.  Controls magnification of outer main title if an array of plots is shown. Default is 1.2 (same as cex.main).}
+  \item{line.main}{Optional. Specifies the line position of main title in individual plots. Default is 0.5.}
+  \item{line.main.outer}{Optional. Specifies the line position of outer main title if an array of plots is shown. Default is NULL so that R default is used.}
+  \item{las}{Optional. Plot parameter, see \code{\link{par}}. Numeric. The style of axis labels. Default is NULL so that R default is used.}
+  \item{mar}{Optional. Gives the number of lines of margin to be specified on the four sides of the plot. Default: \code{c(4,3,2,0)} for array of plots, \code{c(4,4,3,1)} for a single plot.}
+  \item{oma}{Optional. Gives the size of the outer margins in lines of text. Default: \code{c(0,0,5,1)} for array of plots, \code{c(0,0,0,0)} for a single plot.}
+  \item{mgp}{Optional.  Plot parameter, see \code{\link{par}}. The margin line for the axis title, axis label and axis line. Defauls is \code{c(2,1,0)}, different from R default.}
+  \item{vec.xlab}{Optional.  Controls title for xaxis.  Should be a 9-vector of characters for an array of plots and a character for a single plot. As R recycles entries if a vector is too short, then \code{vec.xlab=""} will remove titles on x-axis. Default: NULL.}
 }
 \note{
 
@@ -106,13 +125,38 @@ The linear plane is parametrised in terms of
 a level, which is the value of the predictor at 
 \code{age=cohort=1}, which is usually outside the index set for the data;
 while age and cohort slopes are adjusted for the ad hoc identification of the time effects.
+
+(3)
+The default of the titles \code{main.sub} are generated internally depending on model specification.
+In the case of \code{model.design="APC"} and a dose-response model family the default value is
+\code{c(expression(paste("(a) ",Delta^2,alpha)), 
+expression(paste("(b) ",Delta^2,beta)),  
+expression(paste("(c) ",Delta^2,gamma)), 
+"(d)  first linear trend",
+"(e)  level",
+"(f)  second linear trend",
+expression(paste("(g) detrended ",Sigma^2,Delta^2,alpha)),
+expression(paste("(h) detrended ",Sigma^2,Delta^2,beta)),
+expression(paste("(i) detrended ",Sigma^2,Delta^2,gamma)))}
+
+(4)
+Default values of parameters changed (28 Sep 2020).
+The old appearance can be reproduced by	setting \code{cex.lab=1.5}. For example:
+
+\code{data.list	<- data.Italian.bladder.cancer()}
+
+\code{fit.apc <- apc.fit.model(data.list,"poisson.dose.response","APC")}
+
+\code{apc.plot.fit(fit.apc,cex.lab=1.5)}
+
+The code subsumes \code{var.apc.plot.fit} by Zoe Fannon.
 }
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 12 Apr 2015}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> & Zoe Fannon 28 September 2020 (12 Apr 2015).}
 \seealso{
 \code{\link{data.asbestos}}
 and
@@ -120,8 +164,11 @@ and
 
 Values of coefficients can be found using \code{\link{apc.identify}}.
 
-The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}
-has information on the identification.
+Further information on the identification in the vignette
+	\href{../doc/Identification.pdf}{\code{Identification.pdf}},
+	\href{../doc/Identification.R}{\code{Identification.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}.
 }
 \examples{
 #####################
@@ -133,16 +180,23 @@ data.list	<- data.Italian.bladder.cancer()
 apc.fit.table(data.list,"poisson.dose.response")
 fit.apc		<- apc.fit.model(data.list,"poisson.dose.response","APC")
 apc.plot.fit(fit.apc)
-dev.new()
+#	now try an AC model
+#	can use dev.new() to see both
 fit.ac		<- apc.fit.model(data.list,"poisson.dose.response","AC")
 apc.plot.fit(fit.ac)
 
 #	to check the numerical values for the last two rows of plots use
 apc.identify(fit.ac)$coefficients.detrend
-apc.identify(fit.ac)$coefficients.detrend
 
 #	to get only a sub plot and playing with titles
+#	main.outer not used with individual plot
 apc.plot.fit(fit.ac,sub.plot="a",main.outer="My outer title",main.sub="My sub title")
-#	to get only a all plots and playing with titles
-apc.plot.fit(fit.ac,main.outer="My outer title",main.sub=c("1","2","3","4","5","6","7","8","9"))
+#	to play with
+#		titles (main.outer/main.sub),
+#		label orientation (las),
+#		axis titles (vec.xlab)
+apc.plot.fit(fit.ac,main.outer="My outer title",
+				main.sub=c("1","2","3","4","5","6","7","8","9"),
+				las=1,
+				vec.xlab=c("a","b","c","d","e","f","g","h","i"))
 }

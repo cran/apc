@@ -1,9 +1,11 @@
 #######################################################
 #	apc package
+#	Bent Nielsen, 28 September 2020, version 2.0.0
+#	Bent Nielsen, 2 May 2017, version 1.3.1
 #	Bent Nielsen, 17 Sep 2016, version 1.2.2
 #	function to plot fit
 #######################################################
-#	Copyright 2014-2016 Bent Nielsen
+#	Copyright 2014-2017 Bent Nielsen
 #	Nuffield College, OX1 1NF, UK
 #	bent.nielsen@nuffield.ox.ac.uk
 #
@@ -25,7 +27,15 @@
 #	plot parameters
 ###########################################
 
-apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detrend",sub.plot=NULL,main.outer=NULL,main.sub=NULL,cex=NULL,cex.axis=NULL)
+apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detrend",
+								include.linear.plane=TRUE,include.double.differences=TRUE,
+								sub.plot=NULL,main.outer=NULL,main.sub=NULL,
+								cex=NULL,cex.axis=NULL,cex.lab=NULL,cex.main=NULL,
+								cex.main.outer=1.2,line.main=0.5,line.main.outer=NULL,
+								las=NULL,mar=NULL,oma=NULL,mgp=c(2,1,0),
+								vec.xlab=NULL)
+#	BN,ZF 20 Sep 2020: Subsumed functionality from var.apc.plot.fit
+#	BN	2 May 2017: Updated sdv for intercept for mixed models
 #	BN 17 Sep 2016: Warning message changed
 #	BN 3 Apr 2015
 #	in		apc.fit.model	list
@@ -39,6 +49,9 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 	if(type=="ss.dd")	type<-"sum.sum"
 	#################
 	#	get values from fit
+	intercept				<- apc.fit.model$intercept		# 25/09/2020 used for panels
+	if(is.null(intercept))									# 25/09/2020 is NULL for aggregate data
+		intercept 			<- TRUE
 	coefficients.canonical	<- apc.fit.model$coefficients.canonical	
 	slopes					<- apc.fit.model$slopes					
 	difdif					<- apc.fit.model$difdif					
@@ -59,7 +72,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 	U						<- apc.fit.model$U
 	#################
 	# 	identify fit
-	apc.id	<- apc.identify(apc.fit.model)
+	apc.id	<- apc.identify(apc.fit.model)	  # 25/09/2020 now accomodates apc.indiv
 	index.age.max			<- apc.id$index.age.max 				
 	index.per.max			<- apc.id$index.per.max 				
 	index.coh.max			<- apc.id$index.coh.max 				
@@ -75,14 +88,25 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 	coefficients.ssdd		<- apc.id$coefficients.ssdd	
 	coefficients.detrend	<- apc.id$coefficients.detrend	
 	coefficients.demean		<- apc.id$coefficients.demean	
-	coefficients.dif		<- apc.id$coefficients.dif		
+	coefficients.dif		<- apc.id$coefficients.dif
+	if(!intercept)									# 25/09/2020 used for panels
+	{
+		v_o <- apc.id$linplane[[1]]
+  		v_a <- apc.id$linplane[[2]]
+  		v_c <- apc.id$linplane[[3]]
+  		v_p <- apc.id$linplane[[4]]
+	}
+	##############################
+	#	model lists
+	l.model.F		<- c("FAP", "FA", "FP","Ft")
+	l.model.names.F	<- "FAP, FA, FP, Ft"
 	##############################
 	#	check model design
 	if(isTRUE(type %in% c("dif")))
 	{	if(model.design=="APC")
 			return(cat("apc.error: differences not identified when model.design is APC.  Type cannot be demean or dif \n"))
-		if(model.design %in% c("Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1"))	
-			return(cat("apc.error: types demean and dif not implemented for model designs At, Pt, Ct, A, P, C, t, tA, tP, tC, 1 \n"))
+		if(model.design %in% c("Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1",l.model.F))	
+			return(cat(paste("apc.error: types demean and dif not implemented for model designs At, Pt, Ct, A, P, C, t, tA, tP, tC, 1",l.model.names.F,"\n")))
 	}
 	###########################################
 	#	construct ingredients to plot depending on type
@@ -107,8 +131,8 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		##################
 		#	do plot?
 		v.do.plot[1:3]	<- difdif	
-		v.do.plot[4]	<- isTRUE(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","t","tA","tP"))
-		v.do.plot[5]	<- TRUE
+		v.do.plot[4]	<- isTRUE(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","t","tA","tP",l.model.F))
+		v.do.plot[5]	<- intercept	# BN/ZF 250920 panel
 		v.do.plot[6]	<- isTRUE(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","C","t","tC"))
 		v.do.plot[7:9]	<- difdif	
 		##################
@@ -121,7 +145,9 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		if(model.design %in% c("A","tA"))
 			v.main.sub[4]	<-"(d)  age linear trend"
 		if(model.design %in% c("P","tP"))									
-			v.main.sub[4]	<- "(d)  period linear trend"	
+			v.main.sub[4]	<- "(d)  period linear trend"
+		if (model.design %in% l.model.F) 	# 25/09/2020 used for panels
+      		v.main.sub[4] <- "(d) linear trend"
 		if(!mixed)
 			v.main.sub[5]	<- "(e)  level"
 		if(mixed)
@@ -145,7 +171,7 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		l.dates[[1]]	<- dates[index.age,1]
 		l.dates[[2]]	<- dates[index.per,1]
 		l.dates[[3]]	<- dates[index.coh,1]
-		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
+		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA",l.model.F))
 			l.dates[[4]]	<- age1+seq(0,age.max-1)*unit
 		if(model.design %in% c("P","tP"))									
 			l.dates[[4]]	<- per1+seq(0,per.max-1)*unit
@@ -167,31 +193,47 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		{	coefficients.sum.sum	<- coefficients.ssdd
 			UU <- U
 		}
-		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
-			l.coefficients[[4]]	<- matrix(data=seq(1,age.max)-UU  		,nrow=age.max,ncol=1) %*% coefficients.sum.sum[2,]
-		if(model.design %in% c("P","tP"))									
-			l.coefficients[[4]]	<- matrix(data=seq(1,per.max)-per.odd-1	,nrow=per.max,ncol=1) %*% coefficients.sum.sum[2,]
-		l.coefficients[[5]]		<- matrix(data=c(1,1)		       		,nrow=2	     ,ncol=1) %*% coefficients.sum.sum[1,]
-		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t"))
-			l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 		,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[3,]
-		if(model.design %in% c("C","tC"))									
-			l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 	 	,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[2,]		
+		if(intercept)						# BN 250920 for non panel
+		{		
+			if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
+				l.coefficients[[4]]	<- matrix(data=seq(1,age.max)-UU  		,nrow=age.max,ncol=1) %*% coefficients.sum.sum[2,]
+			if(model.design %in% c("P","tP"))									
+				l.coefficients[[4]]	<- matrix(data=seq(1,per.max)-per.odd-1	,nrow=per.max,ncol=1) %*% coefficients.sum.sum[2,]
+			l.coefficients[[5]]		<- matrix(data=c(1,1)		       		,nrow=2	     ,ncol=1) %*% coefficients.sum.sum[1,]
+			if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t"))
+				l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 		,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[3,]
+			if(model.design %in% c("C","tC"))									
+				l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 	 	,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[2,]
+		}
+		if(!intercept)
+		{
+			if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
+				l.coefficients[[4]]	<- matrix(data=seq(1,age.max)-UU  		,nrow=age.max,ncol=1) %*% coefficients.sum.sum[v_a,]
+			if(model.design %in% c("P","tP"))									
+				l.coefficients[[4]]	<- matrix(data=seq(1,per.max)-per.odd-1	,nrow=per.max,ncol=1) %*% coefficients.sum.sum[v_p,]
+			if(model.design %in% l.model.F) 
+      			l.coefficients[[4]] <- matrix(data=seq(1,age.max)-UU 		,nrow=age.max,ncol=1) %*% coefficients.sum.sum[v_a,]
+			if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t"))
+				l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 		,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[v_c,]
+			if(model.design %in% c("C","tC"))									
+				l.coefficients[[6]]	<- matrix(data=seq(1,coh.max)-UU 	 	,nrow=coh.max,ncol=1) %*% coefficients.sum.sum[v_c,]
+		}
 		l.coefficients[[7]]	<- coefficients.sum.sum[index.age.max,]
 		l.coefficients[[8]]	<- coefficients.sum.sum[index.per.max,]
 		l.coefficients[[9]]	<- coefficients.sum.sum[index.coh.max,]
 		####################
 		#	xlab
-		v.xlab[1:3]	<- c("age","period","cohort")
-		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA"))
+		v.xlab[1:3]		<- c("age","period","cohort")
+		if(model.design %in% c("APC","AP","AC","PC","Ad","Pd","Cd","t","A","tA",l.model.F))
 			v.xlab[4]	<- "age"
 		if(model.design %in% c("P","tP"))									
 			v.xlab[4]	<- "period"
 		if(!mixed)
 			v.xlab[5]	<- "age, period, cohort"
 		if(mixed)
-			v.xlab[5]		<- ""
-		v.xlab[6]	<- "cohort"
-		v.xlab[7:9]	<- c("age","period","cohort")
+			v.xlab[5]	<- ""
+		v.xlab[6]		<- "cohort"
+		v.xlab[7:9]		<- c("age","period","cohort")
 		####################
 		#	intercept
 		v.intercept[5]	<- TRUE
@@ -239,10 +281,10 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		l.coefficients[[9]]	<- coefficients.demean[index.coh.sub,]
 		####################
 		#	xlab
-		v.xlab[1:3]	<- c("age","period","cohort")
+		v.xlab[1:3]				<- c("age","period","cohort")
 		if(!mixed)	v.xlab[5]	<- "age, period, cohort"
-		if(mixed) 	v.xlab[5]		<- ""
-		v.xlab[7:9]	<- c("age","period","cohort")
+		if(mixed) 	v.xlab[5]	<- ""
+		v.xlab[7:9]				<- c("age","period","cohort")
 		####################
 		#	intercept
 		v.intercept[5]	<- TRUE
@@ -261,7 +303,11 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
     #######################################################
     #	Internal function to plot estimates with sdv
     #######################################################   
-    function.plot.est.sdv	<- function(dates,coefficients,xlab="",main="",scale=0,sdv.at.zero=FALSE,intercept=FALSE,tau=FALSE,cex=NULL,cex.axis=NULL)
+    function.plot.est.sdv	<- function(dates,coefficients,xlab="",main="",scale=0,
+										sdv.at.zero=FALSE,intercept=FALSE,tau=FALSE,
+										cex=NULL,cex.axis=NULL,cex.lab=NULL,cex.main=NULL,
+										las=NULL,line.main=NULL,mgp=NULL)
+    #	BN 28 Sep 2020	Added options: cex.lab, cex.main, las, line.main, mgp
     #	BN 2 Dec 2013
     {	#	function.plot.est.sdv
     	#	define function that can move to exponential scale
@@ -284,18 +330,30 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 			sdv0	<- (1-sdv.at.zero)*est		
 			################
 			#	set ylim
-			y.lower	<- min(0,min(function.scale(est,scale)),max(2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE)))
-			y.upper	<- max(0,max(function.scale(est,scale)),min(2*max(function.scale(est,scale)),min(function.scale(sdv0+sdv,scale),na.rm=TRUE)))
-			if(max(est)-min(est)<min(sdv,na.rm=TRUE)/2)
-				cat("WARNING apc.plot.fit: sdv large in for plot",i,"- possibly not plotted\n")
+			if(tau==FALSE)	# BN if condition added 2 May 2017
+			{	y.lower	<- min(0,min(function.scale(est,scale)),max(2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE)))
+				y.upper	<- max(0,max(function.scale(est,scale)),min(2*max(function.scale(est,scale)),min(function.scale(sdv0+sdv,scale),na.rm=TRUE)))
+				if(max(est)-min(est)<min(sdv,na.rm=TRUE)/2)
+					cat("WARNING apc.plot.fit: sdv large for plot",i,"- possibly not plotted\n")
+			}
+			else			# BN else condition added 2 May 2017
+			{	y.lower	<- min(0,min(function.scale(est,scale)))
+				y.upper	<- max(0,max(function.scale(est,scale)))
+				cat("WARNING apc.plot.fit: sdv large for plot",i," because constant not treated as parameter in mixed parametrisation models\n")
+			}
 			################
 			#	remove tick marks if intercept
 			xaxt="s"
 			if(intercept==TRUE)	xaxt <- "n"
 			#	plot
-			plot(dat,function.scale(est,scale),type="l",xlab="",ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),cex.axis=cex.axis)
-			mtext(side = 1, text = xlab, line = 2  ,cex=cex) 
-			mtext(side = 3, text = main, line = 0.5,cex=cex) 
+#			plot(dat,function.scale(est,scale),type="l",xlab=xlab,ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),main=main,
+#					cex.axis=cex.axis,cex.lab=cex.lab,cex.main=cex.main,line=line,mgp=mgp)
+			plot(dat,function.scale(est,scale),type="l",xlab=xlab,ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),
+					cex.axis=cex.axis,cex.lab=cex.lab,las=las,mgp=mgp)
+			mtext(side = 3, text = main, cex=cex.main, line=line.main)
+#			mtext(side = 1, text = xlab, line = 2  ,cex=cex) 
+#			mtext(side = 3, text = main, line = 0.5,cex=cex)
+#			title(main,cex.main=cex.main)
 			if(tau==FALSE)
 			{	lines(dat,function.scale(sdv0+  sdv,scale),lty=2,col="blue" )
 				lines(dat,function.scale(sdv0-1*sdv,scale),lty=2,col="blue" )
@@ -317,16 +375,22 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 			sdv0	<- (1-sdv.at.zero)*est		
 			################
 			#	set ylim
-			y.lower	<- min(0,min(function.scale(est,scale)),max( 2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
-			y.upper	<- max(0,max(function.scale(est,scale)),min( 2*max(function.scale(est,scale)),min(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
+			if(tau==FALSE)	# BN added 2 May 2017
+			{	y.lower	<- min(0,min(function.scale(est,scale)),max( 2*min(function.scale(est,scale)),max(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
+				y.upper	<- max(0,max(function.scale(est,scale)),min( 2*max(function.scale(est,scale)),min(function.scale(sdv0-sdv,scale),na.rm=TRUE) ))
+			}	
 			################
 			#	remove tick marks if intercept
 			xaxt="s"
 			if(intercept==TRUE)	xaxt <- "n"
 			#	plot
-			plot(dat,function.scale(est,scale),type="p",xlab="",ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),xlim=c(dat-1,dat+1),pch=19,cex.axis=cex.axis)
-			mtext(side = 1, text = xlab, line = 2  ,cex=cex) 
-			mtext(side = 3, text = main, line = 0.5,cex=cex) 
+#			plot(dat,function.scale(est,scale),type="p",xlab=xlab,ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),xlim=c(dat-1,dat+1),pch=19,main=main,
+#					cex.axis=cex.axis,cex.lab=cex.lab,cex.main=cex.main)
+			plot(dat,function.scale(est,scale),type="p",xlab=xlab,ylab="",xaxt=xaxt,ylim=c(y.lower,y.upper),xlim=c(dat-1,dat+1),pch=19,
+					cex.axis=cex.axis,cex.lab=cex.lab,las=las)
+			mtext(side = 3, text = main, cex=cex.main, line=line.main)		
+#			mtext(side = 1, text = xlab, line = 2  ,cex=cex) 
+#			mtext(side = 3, text = main, line = 0.5,cex=cex) 		###################
 			if(tau==FALSE)
 			{	points(dat,function.scale(sdv0+  sdv,scale),col="blue" )
 				points(dat,function.scale(sdv0-1*sdv,scale),col="blue" )
@@ -338,19 +402,28 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 	}	#	function.plot.est.sdv
 	#############################################
 	#	plots
-	if(is.null(sub.plot)==TRUE)
+	if(is.null(sub.plot)==TRUE)	
 	{
-		par(mfrow=c(3,3));	par(mar=c(4,3,2,0),oma=c(0,0,5,1));
-		if(is.null(cex)==TRUE) 		cex 		<- 1
-		if(is.null(cex.axis)==TRUE) cex.axis 	<- 1		
+		no.row	<- 3
+		if(!include.linear.plane)		no.row	<- no.row-1
+		if(!include.double.differences)	no.row	<- no.row-1
+		if(is.null(mar)) mar <- c(4,3,2,0)
+		if(is.null(oma)) oma <- c(0,0,5,1)
+		par(mfrow=c(no.row,3));	par(mar=mar,oma=oma);
 		for(i in 1:9)
-		{		
-			if(v.do.plot[i]==TRUE)
-				function.plot.est.sdv(l.dates[[i]],l.coefficients[[i]],xlab=v.xlab[i],main=v.main.sub[i],intercept=v.intercept[i],tau=v.tau[i],scale=scale,sdv.at.zero=sdv.at.zero,cex=cex,cex.axis=cex.axis)
-			else
-				frame()
-		}		
-		title(main=main,outer=TRUE)
+			if( 	(i<=3 & include.double.differences)
+				|	(i>3 & i<=6 & include.linear.plane)
+				|	(i>6) )
+			{
+				if(is.null(vec.xlab))	xlab=v.xlab[i]
+				else					xlab=vec.xlab[i]								
+				if(v.do.plot[i]==TRUE)
+					function.plot.est.sdv(l.dates[[i]],l.coefficients[[i]],xlab=xlab,main=v.main.sub[i],intercept=v.intercept[i],tau=v.tau[i],scale=scale,sdv.at.zero=sdv.at.zero,
+						cex=cex,cex.lab=cex.lab,cex.axis=cex.axis,cex.main=cex.main,line.main=line.main,las=las,mgp=mgp)
+				else
+					frame()
+			}		
+		title(main=main,outer=TRUE,cex.main=cex.main.outer,line=line.main.outer)
 	}
 	else
 	{	if(sub.plot=="a")	i <- 1
@@ -362,15 +435,22 @@ apc.plot.fit	<- function(apc.fit.model,scale=FALSE,sdv.at.zero=TRUE,type="detren
 		if(sub.plot=="g")	i <- 7
 		if(sub.plot=="h")	i <- 8
 		if(sub.plot=="i")	i <- 9
-		par(mfrow=c(1,1));	par(mar=c(4,5,3,1),oma=c(0,0,0,0)); cex <- NULL
+		if(is.null(mar)) mar <- c(4,4,3,1)
+		if(is.null(oma)) oma <- c(0,0,0,0)
+		par(mfrow=c(1,1));	par(mar=mar,oma=oma);
 		main	<- main.sub
 		if(is.null(main)==TRUE)	main <- v.main.sub[i]
+		if(is.null(vec.xlab))	xlab=v.xlab[i]
+		else					xlab=vec.xlab								
 		if(v.do.plot[i]==TRUE)
-			function.plot.est.sdv(l.dates[[i]],l.coefficients[[i]],xlab=v.xlab[i],main=main,scale=scale,sdv.at.zero=sdv.at.zero,cex=cex)
+			function.plot.est.sdv(l.dates[[i]],l.coefficients[[i]],xlab=xlab,main=main,scale=scale,sdv.at.zero=sdv.at.zero,
+				cex=cex,cex.lab=cex.lab,cex.main=cex.main,line.main=line.main,las=las,mgp=mgp)
 		else
 			return(cat("apc.plot.fit error: cannot draw this sub.plot. Check sub.plot is correct \n"))
 	}
+	par(mfrow=c(1,1))
 }	#	apc.plot.fit
+
 
 ##################################################
 #	Plot residuals

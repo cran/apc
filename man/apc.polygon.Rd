@@ -39,10 +39,14 @@
 	uses the data
 	\code{\link{data.asbestos}}.
 	The results of that paper are reproduced in 
-	the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/ReproducingMMNN2015.pdf}{ReproducingMMNN2015.pdf}.
+	the vignette
+	\href{../doc/ReproducingMMNN2015.pdf}{\code{ReproducingMMNN2015.pdf}},
+	\href{../doc/ReproducingMMNN2015.R}{\code{ReproducingMMNN2015.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}.
 	The function is used there.
 }
 \references{
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{https://doi.org/10.1111/rssa.12051}{Article}, \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 6 Jan 2016}

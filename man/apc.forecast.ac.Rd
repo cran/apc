@@ -1,22 +1,26 @@
 \name{apc.forecast.ac}
 \alias{apc.forecast.ac}
-\title{Forecast for Poisson response model with AC structure.}
-\description{Computes forecasts for a model with AC structure.  Forecasts of the linear predictor are given for all models.
-Distributions forecasts are provided for a Poisson response model (using Martinez Miranda, Nielsen and Nielsen, 2015)
-and for an over-dispersed Poisson response model (using Harnau and Nielsen, 2016).
+\title{Forecast for responses model with AC or CL structure.}
+\description{Computes forecasts for a model with AC or Chain Ladder structure.
+Forecasts of the linear predictor are given for all models.
+Distributions forecasts are provided for a Poisson response model (using Martinez Miranda, Nielsen and Nielsen, 2015),
+for an over-dispersed Poisson response model (using Harnau and Nielsen, 2017)
+and
+for a log normal response model (using Kuang and Nielsen, 2018)
 This is done for the triangle which shares age and cohort indices with the data.}
 \usage{apc.forecast.ac(apc.fit,sum.per.by.age=NULL,
-sum.per.by.coh=NULL,
-quantiles=NULL,
-suppress.warning=TRUE)}
+			sum.per.by.coh=NULL, quantiles=NULL, suppress.warning=TRUE)}
 \arguments{
   \item{apc.fit}{List. Output from \code{\link{apc.fit.model}}.
   					Note: apc.fit.model should be run with AC structure so that 
 					\code{apc.fit$model.design=="AC"}.
 					Distribution forecasts are only provided for a Poisson response model where
 					\code{apc.fit$model.family=="poisson.response"}
-					and for an over-disperse Poisson response model where
-					\code{apc.fit$model.family=="poisson.response"}.
+					for an over-disperse Poisson response model where
+					\code{apc.fit$model.family=="poisson.response"}
+					and
+					for a log normal response model where
+					\code{apc.fit$model.family=="log.normal.response"}.
 					For other models only point forecasts of the linear predictor are provided, that is
 					the first two values \code{linear.predictors.forecast} and \code{index.trap.J}.}
   \item{sum.per.by.age}{\emph{Optional}. Vector.  If not NULL it will generate forecasts by period,
@@ -87,12 +91,16 @@ suppress.warning=TRUE)}
 	a process error and an estimation error.
 	The empirical example of that paper uses the data
 	\code{\link{data.asbestos}}.
-	The results of that paper are reproduced in 
-	the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/ReproducingMMNN2015.pdf}{ReproducingMMNN2015.pdf}.
-
+	The results of that paper are reproduced in
+	the vignette 
+	\href{../doc/ReproducingMMNN2015.pdf}{\code{ReproducingMMNN2015.pdf}},
+	\href{../doc/ReproducingMMNN2015.R}{\code{ReproducingMMNN2015.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}.		
+	
 	\emph{Overdispersed Poisson response forecast errors}.
 	The asymptotic theory for the overdispersed Poission forecast standard errors is presented in
-	Harnau and Nielsen (2016).
+	Harnau and Nielsen (2018).
 	The sampling theory is based on infinitely devisible distributions, with the
 	compound Poisson distribution as a special case.
 	This results in scale nuisance parameter, which is estimated by
@@ -100,21 +108,30 @@ suppress.warning=TRUE)}
 	Asymptotically this gives a t/F theory.
 	There are three independent contributions to the forecast error:
 	a process error, an estimation error and a sampling error for the overall mean.
+
+	\emph{Generalized log normal forecast errors}.
+	Uses the asymptotic theory present in Kuang and Nielsen (2018).
+	The sampling theory is based on infinitely devisible distributions,
+	using small sigma asymptotics.
+	There are two independent contributions to the forecast error:
+	a process error and an estimation error.
 	
 	The examples below are based on the smaller data reserving sets
 	\code{\link{data.loss.VNJ}},
 	\code{\link{data.loss.TA}}.
-
-	
+	See also
+	\code{\link{data.loss.XL}}.	
 }
 \references{
-Harnau, J. and Nielsen (2016) Asymptotic theory for over-dispersed age-period-cohort and extended chain ladder models. Mimeo. 
+Harnau, J. and Nielsen (2018) Over-dispersed age-period-cohort models. \emph{Journal of the American Statistical Association} 113, 1722-1732. \emph{Download}: \href{https://www.nuffield.ox.ac.uk/economics/papers/2017/HarnauNielsen2017apcDP.pdf}{Nuffield DP}
 
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}.
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{https://doi.org/10.1111/rssa.12051}{Article}, \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 
 Martinez Miranda, M.D., Nielsen, B., Nielsen, J.P. and Verrall, R. (2011) Cash flow simulation for a model of outstanding liabilities based on claim amounts and claim numbers. \emph{ASTIN Bulletin} 41, 107-129.
+
+Kuang, D, Nielsen B (2018) Generalized log-normal chain-ladder. mimeo Nuffield Collge.
 }
-\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 30 June 2016 (2 Mar 2016)}
+\author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 18 November 2019 (2 Mar 2016)}
 \seealso{The example below uses Japanese breast cancer data, see \code{\link{data.Japanese.breast.cancer}}}
 \examples{
 #####################
@@ -225,6 +242,10 @@ forecast$response.forecast.all
 #	 G-0.010  G-0.050  G-0.500  G-0.950  G-0.990 
 #	12760202 14398564 18553290 23417098 25792423 
 forecast$response.forecast.per
+
+#####################
+#  EXAMPLE with reserving data: data.loss.XL()
+#  see helpfile for data.loss.XL 	
 
 
 }

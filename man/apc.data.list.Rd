@@ -41,9 +41,9 @@ provided by the user.
 			\item{"trapezoid"}{has    age/period as increasing row/column index, period-diagonals are NA for period <= per.zero and >per.zero+per.max.}
 		}}
  	\item{dose}{\emph{Optional}. matrix or NULL.  Numbers of doses.  It should have same format as \code{response}.}
-    \item{age1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "AP", "CA", "CL", "PA", "trapezoid". If NULL default is 1.}
-    \item{per1}{\emph{Optional}. Numeric or NULL.  Time label for oldest period group.  Used if \code{data.format} is "AP", "CP", "PA", "PC". If NULL default is 1.}
-    \item{coh1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "CA", "CL", "CL.vector.by.row", "CP", "PC", "trapezoid". If NULL default is 1.}
+    \item{age1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "AP", "CA", "CL", "PA", "trapezoid". If NULL default is unit.}
+    \item{per1}{\emph{Optional}. Numeric or NULL.  Time label for oldest period group.  Used if \code{data.format} is "AP", "CP", "PA", "PC". If NULL default is unit.}
+    \item{coh1}{\emph{Optional}. Numeric or NULL.  Time label for youngest age group.  Used if \code{data.format} is "AC", "CA", "CL", "CL.vector.by.row", "CP", "PC", "trapezoid". If NULL default is unit.}
     \item{unit}{\emph{Optional}. Numeric or NULL.  Common time steps for age, period and cohort.  For quarterly data use \code{1/4}.  For monthly data use \code{1/12}. If NULL default is 1.}
 	\item{per.zero}{\emph{Optional}. Numeric or NULL.  Needed if data format is "trapezoid".}
 	\item{per.max}{\emph{Optional}. Numeric or NULL.  Needed if data format is "trapezoid".}
@@ -83,7 +83,7 @@ The latter choice seeks to match a real time scale the user sets according to ag
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 17 Nov 2016}
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{http://biomet.oxfordjournals.org/cgi/reprint/95/4/979}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
 Nielsen, B. (2014) Deviance analysis of age-period-cohort models. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
 

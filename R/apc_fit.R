@@ -174,7 +174,7 @@ apc.get.design	<- function(apc.index,model.design=NULL)
 #########################################################
 #	apc.fit.model
 #########################################################
-apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL)
+apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL,replicate.version.1.3.1=FALSE)
 #	BN 10 may 2016	od.poisson.response correction to coefficients.canonical
 #	BN 14 apr 2016	Added predictors
 #	BN  2 feb 2016	Changed: parameter label: date to character changed to allow nice decimal points
@@ -199,7 +199,10 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 #											takes log of response and fits gaussian model
 #			model.design				Character. Indicates which sub-model should be fitted.
 #										Possible choices:
-#										"APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1"			
+#										"APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1"
+#			replicate.version.1.3.1		Logical. Replicate error in covariance calculation for
+#										"poisson.response","od.poisson.response"
+#										Default=FALSE
 #	Out:	fit							List.	Standard output from glm.fit.
 #										Note: deviance redefined in Gaussian case,
 #										since glm.fit then returns RSS instead of deviance
@@ -342,7 +345,7 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
     	colnames(coefficients.canonical) <- c("Estimate", "Std. Error", "t value", "Pr(>|t|)")     
 	covariance.canonical	<- summary.glm(fit)$cov.scaled
 	#	Need to condition in mixed parametrisation
-	if(mixed.par)
+	if(mixed.par && replicate.version.1.3.1)
 	{
 		c22	<- covariance.canonical[2:xi.dim,2:xi.dim]
 		c21	<- covariance.canonical[2:xi.dim,1]
@@ -409,15 +412,18 @@ apc.fit.model	<- function(apc.data.list,model.family,model.design,apc.index=NULL
 #	apc.fit.table
 #########################################################
 apc.fit.table	<- function(apc.data.list,model.family,model.design.reference="APC",apc.index=NULL)
+#	BN 10 mar 2018: added F test to gaussian family
 #	BN 17 may 2016: labels corrected
 #	BN 10 may 2016: reference model introduced
 #	BN 17 mar 2015
 {	#	apc.fit.table
 	######################
 	#	model families
-	model.family.list		<- c("binomial.dose.response","poisson.response","od.poisson.response","poisson.dose.response","gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
 	model.family.gaussian	<- c("gaussian.rates","gaussian.response","log.normal.rates","log.normal.response")
 	model.family.od			<- c("od.poisson.response")
+	model.family.other		<- c("binomial.dose.response","poisson.response","poisson.dose.response")
+	model.family.list		<- c(model.family.gaussian,model.family.od,model.family.other)
+
 	######################
 	#	check input
 	if(isTRUE(model.family %in% model.family.list)==FALSE)
@@ -428,20 +434,49 @@ apc.fit.table	<- function(apc.data.list,model.family,model.design.reference="APC
 		apc.index	<- apc.get.index(apc.data.list)
 	######################
 	#	Function to get one line of table from two fits
-	fit.tab.line.glm	<- function(fit.U,fit.R,gaussian)
+	fit.tab.line.glm	<- function(fit.U,fit.R)	
+	#	BN 12 Mar 2018 	updated to simplify output
 	#	BN 20 Sep 2013
+	#	returns
+	#			dev.R		deviance restricted model
+	#			df.R		degrees of freedom restricted model
+	#			pchisq		deviance test (if not gaussian)
+	#			LR			likelihood ratio 
+	#			df			degrees of freedom difference 
+	#			aic
 	{
-		dev.U	<- fit.U$deviance
-		dev.R	<- fit.R$deviance
-		df.U	<- fit.U$df.residual
-		df.R	<- fit.R$df.residual
-		LR	<- dev.R-dev.U
-		df	<- df.R-df.U
-		aic	<- fit.R$aic
-		if(gaussian)		
-			return(round(c(dev.R,df.R,LR,df,pchisq(LR,df,lower.tail=FALSE),aic),digits=3))
-		else	
-			return(round(c(dev.R,df.R,pchisq(dev.R,df.R,lower.tail=FALSE),LR,df,pchisq(LR,df,lower.tail=FALSE),aic),digits=3))
+		model.family<- fit.U$model.family
+		dev.U		<- fit.U$deviance
+		dev.R		<- fit.R$deviance
+		df.U		<- fit.U$df.residual
+		df.R		<- fit.R$df.residual
+		RSS.U		<- fit.U$RSS
+		RSS.R		<- fit.R$RSS
+		aic			<- fit.R$aic
+		p.dev		<- pchisq(dev.R,df.R,lower.tail=FALSE)
+		if(fit.U$model.design==fit.R$model.design)
+		{
+			LR <- df <- p.LR	<- F.odp <- F.gauss <- p.F.odp <- p.F.gauss <- NaN
+		}
+		else
+		{
+			LR			<- dev.R-dev.U
+			df			<- df.R-df.U			
+			p.LR		<- pchisq(LR,df,lower.tail=FALSE)
+			F.odp		<- (LR/df)/(dev.U/df.U)
+			F.gauss 	<- ((RSS.R-RSS.U)/df)/(RSS.U/df.U)
+			p.F.odp		<- pf(F.odp  ,df,df.U,lower.tail=FALSE)
+			p.F.gauss	<- pf(F.gauss,df,df.U,lower.tail=FALSE)
+		}	
+		if(model.family %in% model.family.gaussian)
+			#	-2logL , df , LR , df.res , p.LR , F , p.F, aic	 = 8
+			return(round(c(dev.R,df.R,LR,df,p.LR,F.gauss,p.F.gauss,aic),digits=3))
+		if(model.family  %in% model.family.od)
+			#	dev    , df , F.odp , df.res, p.F.odp			 = 6
+			return(round(c(dev.R,df.R,p.dev,F.odp,df,p.F.odp),digits=3))
+		if(model.family  %in% model.family.other)
+			#	dev		, df , LR , df.res , p.LR , aic			 = 7	
+			return(round(c(dev.R,df.R,p.dev,LR,df,p.LR,aic),digits=3))
 	}
 	######################
 	if(model.design.reference=="APC")	model.design.list	<- c("APC","AP","AC","PC","Ad","Pd","Cd","A","P","C","t","tA","tP","tC","1")
@@ -457,44 +492,33 @@ apc.fit.table	<- function(apc.data.list,model.family,model.design.reference="APC
 	if(model.design.reference=="t")		model.design.list	<- c(				 								 "t","tA","tP","tC","1")
 	######################	
 	#	number of columns
-															ncol <- 7
-		if(isTRUE(model.family %in% model.family.gaussian))	ncol <- 6
-		if(isTRUE(model.family %in% model.family.od))		ncol <- 9
+		if(isTRUE(model.family %in% model.family.gaussian))	ncol <- 8
+		if(isTRUE(model.family %in% model.family.od))		ncol <- 6
+		if(isTRUE(model.family %in% model.family.other))	ncol <- 7
 	######################
 	#	declare table
 	fit.tab		<- matrix(nrow=length(model.design.list),ncol=ncol,data=NA)
 	#	unrestricted apc model
-	fit.apc	<- apc.fit.model(apc.data.list,model.family,model.design=model.design.reference,apc.index)	
+	fit.ref	<- apc.fit.model(apc.data.list,model.family,model.design=model.design.reference,apc.index)	
 	#	model list
 	for(i in 1:length(model.design.list))
 	{
 		fit.sub			<- apc.fit.model(apc.data.list,model.family,model.design=model.design.list[i],apc.index)
-		if(isTRUE(model.family %in% model.family.gaussian))
-			fit.tab[i,1:6]		<- fit.tab.line.glm(fit.apc, fit.sub,1)
-		else	
-			fit.tab[i,1:7]		<- fit.tab.line.glm(fit.apc, fit.sub,0)
+		fit.tab[i,]		<- fit.tab.line.glm(fit.ref, fit.sub)
 	}
-	#	OD F-test
-	if(isTRUE(model.family %in% model.family.od))
-	for(i in 2:length(model.design.list))
-	{	fit.tab[i,8]	= (fit.tab[i,4]/fit.tab[i,5])/(fit.tab[1,1]/fit.tab[1,2])
-		fit.tab[i,9]	= round(pf(fit.tab[i,8],fit.tab[i,5],fit.tab[1,2],lower.tail=FALSE),digits=3)
-	}
-	#	insert NAs
-		insert			<- c(4,5,6)
-	if(isTRUE(model.family %in% model.family.gaussian))
-		insert			<- c(3,4,5)
-	fit.tab[1,insert] <- NA
 	#	row names
 	rownames(fit.tab)	<- model.design.list
 	#	column names
-	colnames.relative	<- c(paste("LR.vs.",model.design.reference,sep=""),paste("df.vs.",model.design.reference,sep=""))
-		colnames		<- c("-2logL","df.residual","prob(>chi_sq)",colnames.relative,"prob(>chi_sq)","aic")
 	if(isTRUE(model.family %in% model.family.gaussian))
-		colnames		<- c("-2logL","df.residual",colnames.relative,"prob(>chi_sq)","aic")
+		colnames(fit.tab)	<- c("-2logL","df.residual",paste("LR vs.",model.design.reference,sep=""),paste("df vs.",model.design.reference,sep=""),"prob(>chi_sq)",paste("F vs.",model.design.reference,sep=""),"prob(>F)","aic")
 	if(isTRUE(model.family %in% model.family.od))
-		colnames		<- c("-2logL","df.residual","prob(>chi_sq)",colnames.relative,"prob(>chi_sq)","aic","F","prob(>F)")	
-	colnames(fit.tab)	<- colnames		
+		colnames(fit.tab)	<- c("deviance","df.residual","prob(>chi_sq)",paste("F vs.",model.design.reference,sep=""),paste("df vs.",model.design.reference,sep=""),"prob(>F)")
+	if(isTRUE(model.family %in% model.family.other))
+		colnames(fit.tab)	<- c("deviance","df.residual","prob(>chi_sq)",paste("LR vs.",model.design.reference,sep=""),paste("df vs.",model.design.reference,sep=""),"prob(>chi_sq)","aic")
 	######################
 	return(fit.tab)
 }	#	apc.fit.table
+# 	new.apc.fit.table(data,"od.poisson.response")
+#	data.paid	<- data.loss.XL()
+#	apc.fit.table(data.paid,"od.poisson.response")
+#	apc.fit.table(data,"poisson.response")

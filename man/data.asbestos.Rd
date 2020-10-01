@@ -41,7 +41,11 @@ data.asbestos.2013.men(all.age.groups = FALSE)}
 An APC analysis of these data can be found in
 Martinez Miranda, Nielsen and Nielsen (2015).
 The results of that paper are reproduced in 
-the \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/ReproducingMMNN2015.pdf}{ReproducingMMNN2015.pdf}.
+the vignette
+	\href{../doc/ReproducingMMNN2015.pdf}{\code{ReproducingMMNN2015.pdf}},
+	\href{../doc/ReproducingMMNN2015.R}{\code{ReproducingMMNN2015.R}}
+	on
+	\href{../doc/index.html}{\code{Vignettes}}.
 These data are also used in Nielsen (2015).
 
 The updated data set \code{data.asbestos.2013} is for 1968-2013 and has the same structure. This is analysed in

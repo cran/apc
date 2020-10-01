@@ -628,6 +628,129 @@ return(apc.data.list(
 			label		="loss TA"					))
 }	#	data.loss.TA
 
+################################
+##	LOSS TRIANGLE DATA
+################################
+#data.loss.Greek	<- function()
+##	BN, 29 jan 2018
+##	A Loss Triangle with A,C effects, over-dispersion
+##	Paid and incurred
+##
+##	Used and analysed in
+##
+##	Margraf, C. and Nielsen, B.
+##	A likelihood approach to Bornhuetter-Ferguson Analysis.
+##	mimeo, Nuffield College
+##
+##	amounts in Euros
+##	
+##	Paid run-off triangle, cumulative
+##	Incurred run-off triangle, cumulative
+#{	#	data.loss.Greek
+##	dimension
+#k		<- 9
+##	Paid and incurred as vectors
+#Paid.vec<- c(	34492471, 47124007,   55244404,   59817460,   62550940,   66042036,   69311560,   70992659,  72265079,
+#				39467733, 54003286,   61349336,   69986825,   76412887,   81768759,   86684598,   90726054,          
+#				38928855, 57087550,   65905902,   77128507,   84158380,   92436441,   97838371,                     
+#				34202332, 50932726,   60560484,   68566905,   76409739,   82082804,                                
+#				35657409, 52397264,   59849582,   66698806,   72724524,                                           
+#				25404394, 37040589,   42371049,   50709319,                                                      
+#				21268516, 31311410,   35973015,                                                                 
+#				17404447, 27786399,                                                                             
+#				17676374)                                                                                       
+#Incu.vec<- c(	54018141, 56699807,   60273204,   61112600,   63729660,   67142341,   69733859,   71980196,   72738376,
+#				68706483, 70534436,   70254136,   75919965,   77900147,   83401774,   88690144,   92171660,           
+#				64613205, 72600950,   76163387,   82388057,   87424383,   96246891,  102854340,                       
+#				58071632, 66701421,   69420629,   75280537,   81978240,   89923269,                                   
+#				60368719, 67868349,   72528239,   80726223,   85339588,                                               
+#				47282519, 56488940,   60896832,   65900623,                                                           
+#				49905225, 54801141,   60026903,                                                                       
+#				48425940, 52652928,                                                                                   
+#				47449977)
+##	Paid and incurred as matrices				
+#Paid.mat.cum	<- vector.2.triangle(Paid.vec,k)					
+#Incu.mat.cum	<- vector.2.triangle(Incu.vec,k)
+##	Get incrementat triangles
+#Paid.mat.inc	<- Paid.mat.cum
+#Incu.mat.inc	<- Incu.mat.cum
+#for(col in k:2)
+#{
+#	Paid.mat.inc[,col]	<- Paid.mat.inc[,col]-Paid.mat.inc[,col-1]
+#	Incu.mat.inc[,col]	<- Incu.mat.inc[,col]-Incu.mat.inc[,col-1]
+#}
+#
+#
+#return(c(apc.data.list(
+#			response		=Paid.mat.inc			,
+#			data.format		="CL"					,
+#			coh1			=2005					,
+#			time.adjust 	=0						,
+#			label			="loss Greek"			),
+#		list(
+#			paid			=Paid.mat.inc			,
+#			incurred		=Incu.mat.inc			,
+#			response.cum	=Paid.mat.cum			,
+#			incurred.cum	=Incu.mat.cum			)
+#			))
+#}	#	data.loss.Greek
+
+
+###############################
+#	LOSS TRIANGLE DATA
+###############################
+data.loss.XL	<- function()
+#	BN, 5 feb 2018
+#	A Loss Triangle with A,C effects, log normal
+#	Paid
+#
+#	Used and analysed in
+#
+#	Kuang, D. and Nielsen, B.
+#	Generalized log-normal chain-ladder.
+#	mimeo, Nuffield College
+#
+#	amounts in 1000 USD
+#	
+#	Paid run-off triangle, cumulative
+#	Incurred run-off triangle, cumulative
+{	#	data.loss.XL
+#	dimension
+k		<- 20
+#	Paid and incurred as vectors
+Paid.vec<- c(  2185 ,  13908 , 44704 , 56445 , 67313 , 62830 , 72619 , 42511 , 32246 , 51257 , 11774 , 21726 , 10926 , 4763  , 3580  , 4777  , 1070 ,  1807  , 824   , 1288 ,            
+			   3004 ,  17478 , 49564 , 55090 , 75119 , 66759 , 76212 , 62311 , 31510 , 15483 , 23970 , 8321  , 15027 , 3247  , 8756  , 14364 , 3967 ,  3858  , 4643  ,                  
+			   5690 ,  28971 , 55352 , 63830 , 71528 , 73549 , 72159 , 37275 , 38797 , 27264 , 28651 , 14102 , 8061  , 17292 , 10850 , 10732 , 4611 ,  4608  ,                         
+			   9035 ,  29666 , 47086 , 41100 , 58533 , 80538 , 70521 , 40192 , 27613 , 13791 , 17738 , 20259 , 12123 , 6473  , 3922  , 3825  , 3082 ,                                 
+			   7924 ,  38961 , 41069 , 64760 , 64069 , 61135 , 62109 , 52702 , 36100 , 18648 , 32572 , 17751 , 18347 , 10895 , 2974  , 5828  ,                                       
+			   7285 ,  25867 , 44375 , 58199 , 61245 , 48661 , 57238 , 29667 , 34557 , 8560  , 12604 , 8683  , 9660  , 4687  , 1889  ,                                             
+			   3017 ,  22966 , 62909 , 54143 , 72216 , 58050 , 29522 , 25245 , 19974 , 16039 , 8083  , 9594  , 3291  , 2016  ,                                                   
+			   1752 ,  25338 , 56419 , 75381 , 64677 , 58121 , 38339 , 21342 , 14446 , 13459 , 6364  , 6326  , 6185  ,                                                           
+			   1181 ,  24571 , 66321 , 65515 , 62151 , 43727 , 29785 , 23981 , 12365 , 12704 , 12451 , 8272  ,                                                               
+			   1706 ,  13203 , 40759 , 57844 , 48205 , 50461 , 27801 , 21222 , 14449 , 10876 , 8979  ,                                                                    
+			   623  ,  14485 , 27715 , 52243 , 60190 , 45100 , 31092 , 22731 , 19950 , 18016 ,                       
+			   338  ,  6254  , 24473 , 32314 , 35698 , 25849 , 30407 , 15335 , 15697 ,                                     
+			   255  ,  3842  , 14086 , 26177 , 27713 , 15087 , 17085 , 12520 ,                                         
+			   258  ,  7426  , 22459 , 28665 , 32847 , 28479 , 24096 ,                                               
+			   1139 ,  10300 , 19750 , 32722 , 41701 , 29904 ,                                                    
+			   381  ,  5671  , 34139 , 33735 , 33191 ,                                                           
+			   605  ,  11242 , 24025 , 32777 ,                                                               
+			   1091 ,  9970  , 31410 ,                                         
+			   1221 ,  8374  ,                                               
+			   2458 )                                                        
+#	Paid as matrices				
+Paid.mat	<- vector.2.triangle(Paid.vec,k)					
+return(apc.data.list(
+			response		=Paid.mat				,
+			data.format		="CL"					,
+			age1			=1997					,
+			coh1			=1997					,
+			time.adjust 	=1997					,
+			label			="loss, US casualty, XL Group"	)
+			)
+}	#	data.loss.XL
+
+
 ###############################
 #	AIDS reports in England and Wales
 ###############################

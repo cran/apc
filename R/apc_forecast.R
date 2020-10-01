@@ -1,5 +1,6 @@
 #######################################################
 #	apc package
+#	Bent Nielsen, 18 nov 2019, version 1.3.4
 #	Bent Nielsen,  7 Sep 2016, version 1.2.1.2
 #	Bent Nielsen,  8 Jan 2016, version 1.2
 #	Forecasting
@@ -23,8 +24,10 @@
 #######################################################
 
 apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quantiles=NULL,suppress.warning=TRUE)
+#	BN 13 Nov 2019	extention to log.normal.response
+#	Based on Kuang and Nielsen (2018)
 #	BN 6 Sep 2016	extention to od.poisson.response
-#	Based on Harnau and Nielsen (2016)
+#	Based on Harnau and Nielsen (2018) JASA
 #	BN 31 Jan 2016
 #	Based on Martinez Miranda, Nielsen and Nielsen (2015) JRSS-A
 #	Requires AC structure
@@ -36,6 +39,8 @@ apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quan
 #										Note: apc.fit.model should be run first for a Poisson response model with AC structure so that
 #										apc.fit$model.design=="AC"
 #										apc.fit$model.family=="poisson.response"
+#														or	  "od.poisson.response"		
+#														or	  "log.normal.response"		
 #			sum.per.by.age
 #			sum.per.by.coh
 #			quantiles					vector or NULL.
@@ -85,7 +90,8 @@ apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quan
 	data.format				<- apc.fit$data.format
 	n.decimal				<- apc.fit$n.decimal
 	deviance                <- apc.fit$deviance
-	df.residual             <- apc.fit$df.residual	
+	df.residual             <- apc.fit$df.residual
+	s2						<- apc.fit$s2
 	#	derived values
 	per.forecast.J			<- age.max+coh.max-1-per.zero-per.max
 	n.data.J				<- (per.forecast.J*(per.forecast.J+1)) %/% 2	# note %/% has higher precedence than *
@@ -96,8 +102,8 @@ apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quan
 	if(per.forecast.J==0)
 		return(cat("ERROR apc.forecast.ac: forecast area empty since per.forecast=age.max+coh.max-1-per.zero-per.max=0\n"))
 	distribution.forecasts	<- TRUE	
-	if(isTRUE(model.family %in% c("poisson.response","od.poisson.response"))==FALSE)
-	{	return(cat("WARNING apc.forecast.ac: model.family is not 'poisson.response' or 'od.poisson.response': only point forecasts are generated\n"))
+	if(isTRUE(model.family %in% c("poisson.response","od.poisson.response","log.normal.response"))==FALSE)
+	{	return(cat("WARNING apc.forecast.ac: model.family is not 'poisson.response' or 'od.poisson.response' or 'log.normal.response': only point forecasts are generated\n"))
 		distribution.forecasts	<- FALSE
 	}
 	if(is.null(sum.per.by.age)==FALSE && distribution.forecasts==TRUE)
@@ -169,53 +175,80 @@ apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quan
    	design	<- apc.get.design(apc.index,model.design)$design
 	##############################
 	#	Get point forecasts	for out-of-sample triangle
+	#			(nJxp) x (px1) = (nJx1)
 	linear.predictors.J						<- design.J %*% coefficients.canonical[,1]
 	if(distribution.forecasts)
 	{
 		##############################
 		#	transform linear predictor using link to forecasts	
 		response.forecast.cell					<- exp(linear.predictors.J)
+		if(model.family=="log.normal.response")
+			response.forecast.cell				<- response.forecast.cell*exp(s2/2)
 		trap.response.forecast[index.trap.J]	<- response.forecast.cell
 		##############################
 		#	Get standard deviations
 		#	Use Martinez-Miranda, Nielsen, Nielsen (2005) JRSS-A, Appendix A.2, A.3
 		#	and Harnau, Nielsen (2016)
-		xi.dim	<- nrow(coefficients.canonical)
-		tau		<- sum(fitted.values)
-		#	MMNN (4.4) pi - multinomial probabilities
-		#	HN (5)
-		v.pi	<- fitted.values / tau
-		#	MMNN (A.2): H.2 insample design
-		#	HN after (5)
-		design.2.average	<- colSums(v.pi * design[,2:xi.dim])
-		H.2		<- design[,2:xi.dim] - matrix(data=design.2.average,nrow=n.data,ncol=(xi.dim-1),byrow=T)
-		#	MMNN (A.12): H.2.J outofsample design
-		#	HN after (5)
-		v.pi.J		<- as.vector(exp(linear.predictors.J) / tau)
-		H.2.J		<- design.J[,2:xi.dim] - matrix(data=design.2.average,nrow=n.data.J,ncol=(xi.dim-1),byrow=T)
-		m.pi.H.2.J	<- v.pi.J * H.2.J
-		#	note information per obs is covariance.canonical/tau 
-		s2.est.J	<- (tau^2) * m.pi.H.2.J %*%	covariance.canonical[2:xi.dim,2:xi.dim] %*% t(m.pi.H.2.J)		
+		#	and Kuang, Nielsen (2018)
+		#	13 nov 2019 extended with log normal
+		#	#	for poisson and od.poisson
+		if(model.family  %in% c("poisson.response","od.poisson.response"))
+		{	xi.dim	<- nrow(coefficients.canonical)
+			tau		<- sum(fitted.values)
+			#	MMNN (4.4) pi - multinomial probabilities
+			#	HN (5)
+			v.pi	<- fitted.values / tau
+			#	MMNN (A.2): H.2 insample design
+			#	HN after (5)
+			design.2.average	<- colSums(v.pi * design[,2:xi.dim])
+			H.2		<- design[,2:xi.dim] - matrix(data=design.2.average,nrow=n.data,ncol=(xi.dim-1),byrow=T)
+			#	MMNN (A.12): H.2.J outofsample design
+			#	HN after (5)
+			v.pi.J		<- as.vector(exp(linear.predictors.J) / tau)
+			H.2.J		<- design.J[,2:xi.dim] - matrix(data=design.2.average,nrow=n.data.J,ncol=(xi.dim-1),byrow=T)
+			m.pi.H.2.J	<- v.pi.J * H.2.J
+			#	note information per obs is covariance.canonical/tau 
+			s2.est.J	<- (tau^2) * m.pi.H.2.J %*%	covariance.canonical[2:xi.dim,2:xi.dim] %*% t(m.pi.H.2.J)
+		}
+		# 	for log normal model
+		#   note s2 included in covariance.canonical
+		if(model.family == "log.normal.response")
+		{	dim.J <- length(linear.predictors.J)
+			cov.linear.predictors.J <- design.J %*% covariance.canonical %*% t(design.J)
+			v.proc.J	<- s2 * exp(2*linear.predictors.J) 
+			m.est.J		<- (as.vector(exp(linear.predictors.J)) * design.J) %*% covariance.canonical %*% t(as.vector(exp(linear.predictors.J)) * design.J)
+		}
 		##############################
 		#	Function to generate particular forecasts
 		#	6 Sep 2016 extended with od.poisson.response
 		function.sum.forecasts <- function(m.X,row.label=NULL)
 		#	in		m.X		matrix 	nrow=per.forecast.J,ncol=n.data.J
 		#	note	v.pi.J	vector	nrow=n.data.J
-		{	forecast		<- m.X %*% response.forecast.cell[,1]
-			#	HN sec 5.3: pi_A
-			v.pi.A	<- rowSums(m.X %*% v.pi.J)	#
-			forecast.est.J	<- diag(m.X %*% s2.est.J %*% t(m.X) )
-			forecast.proc.J	<- tau*v.pi.A
-			forecast.tau.J	<- tau*(v.pi.A^2)
-			forecast.J		<- forecast.proc.J + forecast.est.J
+		{	#	point forecast
+			forecast	<- m.X %*% response.forecast.cell[,1]				
+			#	forecast poisson and od.poisson
+			if(model.family  %in% c("poisson.response","od.poisson.response"))
+			{	#	HN sec 5.3: pi_A
+				v.pi.A	<- rowSums(m.X %*% v.pi.J)	#
+				forecast.est.J	<- diag(m.X %*% s2.est.J %*% t(m.X) )
+				forecast.proc.J	<- tau*v.pi.A
+				forecast.tau.J	<- tau*(v.pi.A^2)
+				forecast.J		<- forecast.proc.J + forecast.est.J
+			}
+			#	adjust with over dispersion for od.poisson
 			if(model.family == "od.poisson.response")
 			{	forecast.proc.J	<- forecast.proc.J*deviance/df.residual	
 				forecast.est.J	<- forecast.est.J *deviance/df.residual	
 				forecast.tau.J	<- forecast.tau.J *deviance/df.residual
-				forecast.J	<- forecast.proc.J + forecast.est.J + forecast.tau.J				
+				forecast.J		<- forecast.proc.J + forecast.est.J + forecast.tau.J				
 			}
-			#	combine forecasts for poisson.response
+			#	forecast log normal model
+			if(model.family == "log.normal.response")
+			{	forecast.est.J	<- diag(m.X %*% m.est.J %*% t(m.X) )
+				forecast.proc.J	<- rowSums(m.X %*% v.proc.J)
+				forecast.J		<- forecast.proc.J + forecast.est.J
+			}			
+			#	combine forecasts for all distributions
 			forecast	<- cbind(forecast,sqrt(forecast.J))	
 			forecast	<- cbind(forecast,sqrt(forecast.proc.J))	
 			forecast	<- cbind(forecast,sqrt(forecast.est.J))	
@@ -224,15 +257,15 @@ apc.forecast.ac <- function(apc.fit,sum.per.by.age=NULL,sum.per.by.coh=NULL,quan
 			if(model.family == "od.poisson.response")
 			{	forecast	<- cbind(forecast,sqrt(forecast.tau.J))					
 				col.names		<- c(col.names,"tau.est")
-			}	
+			}			
 			#	optional, add quantiles
 			if(is.null(quantiles)==FALSE)
 			{	if(model.family == "poisson.response")
-			  		for(row in 1:length(quantiles))
+		  			for(row in 1:length(quantiles))
 					{	forecast	<- cbind(forecast,forecast[,1]+forecast[,2]*qnorm(quantiles[row]))
 						col.names	<- c(col.names,paste("n-",apc.internal.function.date.2.character(quantiles[row],3),sep=""))	
 					}	
-				if(model.family == "od.poisson.response")
+				if(model.family %in% c("od.poisson.response","log.normal.response"))
 					for(row in 1:length(quantiles))
 					{	forecast	<- cbind(forecast,forecast[,1]+forecast[,2]*qt(quantiles[row],df.residual))
 						col.names	<- c(col.names,paste("t-",apc.internal.function.date.2.character(quantiles[row],3),sep=""))	

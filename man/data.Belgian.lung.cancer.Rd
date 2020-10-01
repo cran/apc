@@ -30,9 +30,7 @@ The data set is in "AP"-format. The original data set is unbalanced since the fi
 }
 \source{Table VIII of Clayton and Schifflers (1987a).}
 \references{
-Clayton, D. and Schifflers, E. (1987a)
-Models for temperoral variation in cancer rates. I: age-period and age-cohort models. 
-\emph{Statistics in Medicine} 6, 449-467.
+Clayton, D. and Schifflers, E. (1987a) Models for temperoral variation in cancer rates. I: age-period and age-cohort models. \emph{Statistics in Medicine} 6, 449-467.
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 8 Sep 2015 (24 Oct 2013)}
 \seealso{General description of \code{\link{apc.data.list}} format.}
