@@ -12,8 +12,8 @@ The outline of an analysis is described below.
 	\tabular{ll}{
 		Package: \tab apc\cr
 		Type: \tab Package\cr
-		Version: \tab 2.0.0\cr
-		Date: \tab 2020-09-28\cr
+		Version: \tab 2.0.1\cr
+		Date: \tab 2025-06-15\cr
 		License: \tab GPL-3\cr
 	}
 	The apc package uses the canonical parameters suggested by
@@ -177,26 +177,26 @@ Fannon, Z., Monden, C. and Nielsen, B. (2018) Age-period cohort modelling and co
 
 Fannon, Z. and Nielsen, B. (2019) Age-period-cohort models. \emph{Oxford Research Encyclopedia of Economics and Finance}. Oxford University Press. \emph{Download}: \code{doi.org/10.1093/acrefore/9780190625979.013.495}; Earlier version \href{https://www.nuffield.ox.ac.uk/economics/Papers/2018/2018W04_age_period_cohort_models.pdf}{Nuffield DP}. 
 
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \doi{https://doi.org/10.1093/biomet/asn026}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008b) Forecasting with the age-period-cohort model and the extended chain-ladder model. Biometrika 95, 987-991. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn038}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2008/w9/KuangNielsenNielsen_Forecast.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008b) Forecasting with the age-period-cohort model and the extended chain-ladder model. Biometrika 95, 987-991. \emph{Download}: \doi{https://doi.org/10.1093/biomet/asn038}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2008/w9/KuangNielsenNielsen_Forecast.pdf}{Nuffield DP}.
 
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2011) Forecasting in an extended chain-ladder-type model. Journal of Risk and Insurance 78, 345-359. \emph{Download}: \href{http://dx.doi.org/10.1111/j.1539-6975.2010.01395.x}{Article}; Earlier version: \href{http://www.nuffield.ox.ac.uk/economics/papers/2010/w5/Forecast24jun10.pdf}{Nuffield DP}. 
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2011) Forecasting in an extended chain-ladder-type model. Journal of Risk and Insurance 78, 345-359. \emph{Download}: \doi{https://doi.org/10.1111/j.1539-6975.2010.01395.x}; Earlier version: \href{http://www.nuffield.ox.ac.uk/economics/papers/2010/w5/Forecast24jun10.pdf}{Nuffield DP}. 
 
-Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \href{https://doi.org/10.1111/rssa.12051}{Article}, \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
+Martinez Miranda, M.D., Nielsen, B. and Nielsen, J.P. (2015) Inference and forecasting in the age-period-cohort model with unknown exposure with an application to mesothelioma mortality. \emph{Journal of the Royal Statistical Society} A 178, 29-55. \emph{Download}: \doi{https://doi.org/10.1111/rssa.12051}, \href{http://www.nuffield.ox.ac.uk/economics/papers/2013/Asbestos8mar13.pdf}{Nuffield DP}. 
 
 Nielsen, B. (2015) apc: An R package for age-period-cohort analysis. \emph{R Journal} 7, 52-64. \emph{Download}: \href{https://journal.r-project.org/archive/2015-2/nielsen.pdf}{Open access}.
 
 Nielsen, B. (2014) Deviance analysis of age-period-cohort models. \emph{Download}: \href{http://www.nuffield.ox.ac.uk/economics/papers/2014/apc_deviance.pdf}{Nuffield DP}.
 
-Nielsen, B. and Nielsen, J.P. (2014) Identification and forecasting in mortality models. The Scientific World Journal. vol. 2014, Article ID 347043, 24 pages. \emph{Download}: \href{http://www.hindawi.com/journals/tswj/2014/347043}{Article}.
+Nielsen, B. and Nielsen, J.P. (2014) Identification and forecasting in mortality models. The Scientific World Journal. vol. 2014, Article ID 347043, 24 pages. \emph{Download}: \doi{https://doi.org/10.1155/2014/347043}.
 }
 \seealso{
 Vignettes are available on
 \href{../doc/index.htm}{\code{Vignettes}}.
 
 Further information, including minor upgrades and a python version can be found on
-\href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{\code{apc development web page}}.
+\href{https://users.ox.ac.uk/~nuff0078/apc/index.htm}{\code{apc development web page}}.
 }
 \examples{
 #	see vignettes

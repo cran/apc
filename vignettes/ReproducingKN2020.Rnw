@@ -210,7 +210,7 @@ Note, the bootstrap call does not appear to be fully stable and therefore it is 
 here and when building Table 4.3 below.
 
 <<result=tex>>=
-library(ChainLadder)
+#library(ChainLadder)
 #BS <- BootChainLadder(m.cum, R = 10^3, process.distr=c("od.pois"))
 #summary(BS)
 @

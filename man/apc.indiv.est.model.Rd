@@ -60,7 +60,7 @@
   variable. }
   \item{covariates}{A vector of the names of covariates as they appear in the 
   data. Default NULL.}
-  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link{plm}}.}
+  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link[plm]{plm}}.}
   \item{id.var}{Only if using panel data. The name of the individual ID variable.}
   \item{wt.var}{Only if using survey weights. The name of the weights variable.}
   \item{model.family}{Either "gaussian" or "binomial". Default "gaussian".}
@@ -111,7 +111,7 @@
   starting values for parameters on any covariates.
 }
 \value{
-  \item{fit}{The output of either \code{\link{glm}}, \code{\link{svyglm}}, or \code{\link{plm}} for repeated cross-section, repeated cross-section with survey weights, or panel models respectively. Can be used directly with follow-on functions like \code{\link{waldtest}}}.
+  \item{fit}{The output of either \code{\link{glm}}, \code{\link[survey]{svyglm}}, or \code{\link[plm]{plm}} for repeated cross-section, repeated cross-section with survey weights, or panel models respectively. Can be used directly with follow-on functions like \code{\link[lmtest]{waldtest}}}.
   \item{coefficients.canonical}{Matrix of estimates, standard error, t-statistic, and p-value of canonical parameter.}
   \item{coefficients.covariates}{Matrix of estimates, standard error, t-statistic, and p-value of covariates.}
   \item{coefficients.TS}{TS model only: matrix of estimates, standard error, t-statistic, and p-value of TS indicators. }
@@ -138,8 +138,8 @@
   University of Oxford.
 }
 \author{Zoe Fannon <zoe.fannon@economics.ox.ac.uk> 26 Jun 2020}
-\seealso{For model estimation: \code{\link{glm}}, \code{\link{svyglm}}, \code{\link{plm}}
-For model testing: \code{\link{apc.indiv.model.table}}, code{\link{apc.indiv.compare.direct}}, \code{\link{waldtest}}, \code{\link{linearHypothesis}}
+\seealso{For model estimation: \code{\link{glm}}, \code{\link[survey]{svyglm}}, \code{\link[plm]{plm}}
+For model testing: \code{\link{apc.indiv.model.table}}, \code{\link{apc.indiv.compare.direct}}, \code{\link[lmtest]{waldtest}}, \code{\link[car]{linearHypothesis}}.
 For plotting: \code{\link{apc.plot.fit}}.
 The data in these examples are the
 \code{\link[ISLR]{Wage}} data from the package ISLR

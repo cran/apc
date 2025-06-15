@@ -106,12 +106,12 @@ while age and cohort slopes are adjusted for the ad hoc identification of the ti
 Subsumes \code{var.apc.identify} from \code{apc.indiv} (25 Sep 2020)
 }
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn026}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008a) Identification of the age-period-cohort model and the extended chain ladder model. Biometrika 95, 979-986. \emph{Download}: \doi{https://doi.org/10.1093/biomet/asn026}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2007/w5/KuangNielsenNielsen07.pdf}{Nuffield DP}.
 
 Nielsen, B. (2014b) Deviance analysis of age-period-cohort models. Work in progress.
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> & Zoe Fannon 25 Sep 2020 (12 Apr 2015)}
-\seealso{The \href{http://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{http://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}.}
+\seealso{The \href{https://users.ox.ac.uk/~nuff0078/apc/index.htm}{vignette} \href{https://users.ox.ac.uk/~nuff0078/apc/vignettes/Identification.pdf}{Identification.pdf}.}
 \examples{
 ########################
 #	Belgian lung cancer

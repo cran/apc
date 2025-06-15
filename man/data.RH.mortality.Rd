@@ -36,7 +36,7 @@ data.RH.mortality.no()}
 \references{
 Jacobsen, R, von Euler, M, Osler, M, Lynge, E and Keiding, N (2004) Women's death in Scandinavia - what makes Denmark different? \emph{European Journal of Epidemiology} 19, 117-121.
 
-Riebler, A and Held, L. (2010) The analysis of heterogeneous time trends in multivariate age-period-cohort models. \emph{Biostatistics} 11, 57--59. \emph{Download}: \href{http://biostatistics.oxfordjournals.org/content/11/1/57.full.pdf+html}{Open access}, \href{http://biostatistics.oxfordjournals.org/content/11/1/57/suppl/DC1}{Supplementary material}.
+Riebler, A and Held, L. (2010) The analysis of heterogeneous time trends in multivariate age-period-cohort models. \emph{Biostatistics} 11, 57--59. \emph{Download}: \doi{https://doi.org/10.1093/biostatistics/kxp037}, see supplementary material.
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 17 Sep 2016}
 \seealso{General description of \code{\link{apc.data.list}} format.}

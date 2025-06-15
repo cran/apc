@@ -85,7 +85,7 @@ Comparisons are by likelihood ratio or Wald tests.
   \item{test}{The type of test. One of "LR", "Wald".}
   \item{dist}{The distribution against which the test statistic is compared. One of "F", "Chisq".}
   \item{wt.var}{Only if using survey weights. The name of the weights variable.}
-  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link{plm}}.}
+  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link[plm]{plm}}.}
   \item{id.var}{Only if using panel data. The name of the individual ID variable.}
   \item{existing.big.model.fit}{Optional specify the output of
   apc.indiv.fit.model, if already run for the big model.}

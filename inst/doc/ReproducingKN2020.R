@@ -70,7 +70,7 @@ m.cum   <- triangle.cumulative(data)
 ###################################################
 ### code chunk number 9: ReproducingKN2020.Rnw:212-215
 ###################################################
-library(ChainLadder)
+#library(ChainLadder)
 #BS <- BootChainLadder(m.cum, R = 10^3, process.distr=c("od.pois"))
 #summary(BS)
 

@@ -25,12 +25,7 @@ The data set is in "CL"-format.
 	\item{time.adjust}{-1996.  Thus age=1 in cohort=1997 corresponds to period=1997+1997-1+(-1996)=1997.}	
 	\item{label}{character. "loss, US casualty, XL Group".}						
 }
-\source{Table 1.1 of Kuang and Nielsen (2020) and in turn
-	\emph{download}:
-	\href{http://xlgroupltd.gcs-web.com/static-files/0b180970-7117-42e9-bd6b-c3663af60097}{xls file}
-	from
-	\href{http://xlgroupltd.gcs-web.com/events-and-presentations/presentations?c=73041&p=irol-financialreports}{XL Group files}.
-	}
+\source{Table 1.1 of Kuang and Nielsen (2020) and in turn from XL Group Ltd.}
 \references{
 Kuang, D. and Nielsen B. (2020) Generalized log-normal chain-ladder. \emph{Scandinavian Actuarial Journal} 2020, 553-576. \emph{Download}: \href{https://www.tandfonline.com/doi/full/10.1080/03461238.2019.1696885}{Open access}. Earlier version: \href{https://www.nuffield.ox.ac.uk/economics/Papers/2018/2018W02_KuangNielsen2018GLNCL.pdf}{Nuffield DP}.
 }

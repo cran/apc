@@ -25,9 +25,9 @@ They plot are given in the original coordinate system. }
 						which modifies the default way that axes are annotated.
 						The values of x and y give the (approximate) number of tickmarks on
 						the x and y axes. len is not implemented.}
-	\item{contour}{ Optional \code{\link{levelplot}} (\code{\link{lattice}}) parameter.
+	\item{contour}{ Optional \code{\link[lattice]{levelplot}} (\code{\link[lattice]{lattice}}) parameter.
 						Logical. Contour lines drawn if TRUE. Default FALSE.}
-	\item{colorkey}{Optional \code{\link{levelplot}} (\code{\link{lattice}}) parameter.
+	\item{colorkey}{Optional \code{\link[lattice]{levelplot}} (\code{\link[lattice]{lattice}}) parameter.
 						Logical or list. Determines color key. Default TRUE.}
 	\item{return}{Optional. Logical. If TRUE returns matrix with values.  Default is FALSE.}						
 }

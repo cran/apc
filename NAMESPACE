@@ -10,5 +10,8 @@ importFrom("survey", "svydesign", "svyglm")
 importFrom("plm", "fixef", "plm") # apc.indiv: panel data estimation
 importFrom("car", "linearHypothesis")
 importFrom("lmtest", "waldtest", "lrtest")
+import("AER")
+import("ISLR")
+import("ggplot2")
 #importFrom("ISLR", "Wage")
 #importFrom("AER", "PSID7682")

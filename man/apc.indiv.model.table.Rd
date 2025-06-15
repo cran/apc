@@ -70,7 +70,7 @@ Optional list to modify aspects of the Newton-Rhapson iteration for binomial TS 
   \item{TS}{...}
   \item{dist}{The distribution against which the test statistic is compared. One of "F", "Chisq".}
   \item{wt.var}{Only if using survey weights. The name of the weights variable.}
-  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link{plm}}.}
+  \item{plmmodel}{Used to indicate whether a panel data model is to be estimated and if so what type. Default is "notplm", for not panel data. Other values are "pooling", "within", "random". Further details in \code{\link[plm]{plm}}.}
   \item{id.var}{Only if using panel data. The name of the individual ID variable.}
 }
 \details{Each row of the table corresponds to a single sub-model of the APC model. The first three columns test the sub-model in question against the time-saturated model. The next three columns test the sub-model against the full APC model. The final two columns report the likelihood and AIC of the estimated sub-model. The model with the lowest AIC value which is also not rejected in tests against the APC and TS models should be selected.}
@@ -85,7 +85,7 @@ Fannon, Z., Monden, C. and Nielsen, B. (2018) Age-period-cohort modelling and co
 }
 \author{Zoe Fannon <zoe.fannon@economics.ox.ac.uk> 26 Jun 2020}
 \seealso{For model estimation: \code{\link{apc.indiv.est.model}}
-For pairwise model comparison: \code{\link{apc.indiv.model.table}}, \code{\link{waldtest}}, \code{\link{linearHypothesis}}.
+For pairwise model comparison: \code{\link{apc.indiv.model.table}}, \code{\link[lmtest]{waldtest}}, \code{\link[car]{linearHypothesis}}.
 The data in these examples are the
 \code{\link[ISLR]{Wage}} data from the package ISLR
 and the

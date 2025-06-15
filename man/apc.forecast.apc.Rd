@@ -70,7 +70,7 @@ suppress.warning=TRUE)}
 	\code{\link{data.loss.TA}}.
 }
 \references{
-Kuang, D., Nielsen, B. and Nielsen, J.P. (2008b) Forecasting with the age-period-cohort model and the extended chain-ladder model. Biometrika 95, 987-991. \emph{Download}: \href{https://doi.org/10.1093/biomet/asn038}{Article}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2008/w9/KuangNielsenNielsen_Forecast.pdf}{Nuffield DP}.
+Kuang, D., Nielsen, B. and Nielsen, J.P. (2008b) Forecasting with the age-period-cohort model and the extended chain-ladder model. Biometrika 95, 987-991. \emph{Download}: \doi{https://doi.org/10.1093/biomet/asn038}; Earlier version \href{http://www.nuffield.ox.ac.uk/economics/papers/2008/w9/KuangNielsenNielsen_Forecast.pdf}{Nuffield DP}.
 }
 \author{Bent Nielsen <bent.nielsen@nuffield.ox.ac.uk> 10 Sep 2016}
 \seealso{The example below uses Taylor and Ashe reserving see \code{\link{data.loss.TA}}}
